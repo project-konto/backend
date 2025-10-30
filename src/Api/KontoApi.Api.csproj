@@ -11,8 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Domain\KontoApi.Domain.csproj" />
-    <ProjectReference Include="..\Infrastructure\KontoApi.Infrastructure.csproj" />
+    <ProjectReference Include="..\Application\KontoApi.Application.csproj" />
   </ItemGroup>
 
 </Project>

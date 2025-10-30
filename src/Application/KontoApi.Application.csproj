@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\KontoApi.Domain.csproj" />
-    <ProjectReference Include="..\Application\KontoApi.Application.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
