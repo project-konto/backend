@@ -17,7 +17,7 @@ public class Transaction
     public DateTime Date { get; private set; }
     public string Description { get; private set; }
 
-    public Transaction(Money amount, TransactionType type, Category category, DateTime date, string description)
+    public Transaction(Money amount, TransactionType type, Category? category, DateTime date, string description)
     {
         throw new NotImplementedException();
     }

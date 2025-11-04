@@ -9,7 +9,7 @@ public class LoginUserCommand
     public string Password { get; init; }
 }
 
-public class LoginUserResult
+public class LoginUserDto
 {
     public Guid UserId { get; init; }
     public string Name { get; init; }
@@ -27,7 +27,7 @@ public class LoginUserHandler
         passwordHasher = hasher;
     }
     
-    public async Task<LoginUserResult> Handle(LoginUserCommand command)
+    public async Task<LoginUserDto> Handle(LoginUserCommand command)
     {
        var user = await usersRepository.FindByEmailAsync(command.Email);
        if (user == null)
@@ -37,7 +37,7 @@ public class LoginUserHandler
        if (!passwordHasher.Verify(command.Password, hash))
            throw new InvalidOperationException("Invalid email or password");
 
-       return new LoginUserResult
+       return new LoginUserDto
        {
            UserId = user.Id,
            Name = user.Name,

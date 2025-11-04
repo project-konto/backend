@@ -10,7 +10,7 @@ public class RegisterUserCommand
     public string Password { get; init; }
 }
 
-public class RegisterUserResult
+public class RegisterUserDto
 {
     public Guid UserId { get; init; }
     public string Name { get; init; }
@@ -28,7 +28,7 @@ public class RegisterUserHandler
         passwordHasher = hasher;
     }
 
-    public async Task<RegisterUserResult> Handle(RegisterUserCommand command)
+    public async Task<RegisterUserDto> Handle(RegisterUserCommand command)
     {
         var existingUser = await usersRepository.FindByEmailAsync(command.Email);
         if (existingUser != null)
@@ -38,7 +38,7 @@ public class RegisterUserHandler
         var user = new User(Guid.NewGuid(), command.Name, command.Email, hashed);
         
         await usersRepository.AddAsync(user);
-        return new RegisterUserResult
+        return new RegisterUserDto
         {
             UserId = user.Id,
             Name = user.Name,
