@@ -158,6 +158,12 @@ echo "" >&2
 
 # Read from stdin: old-value new-value ref-name
 while read oldrev newrev refname; do
+    # Validate input format
+    if [[ -z "$oldrev" || -z "$newrev" || -z "$refname" ]]; then
+        print_error "Invalid input format: expected 'oldrev newrev refname'" >&2
+        exit $EXIT_FAILURE
+    fi
+    
     # Skip if this is a branch deletion
     if [ "$newrev" = "0000000000000000000000000000000000000000" ]; then
         continue
@@ -168,11 +174,17 @@ while read oldrev newrev refname; do
     if [ "$oldrev" = "0000000000000000000000000000000000000000" ]; then
         # Get commits that are new to the repository (not in any other ref)
         # This is efficient even for new branches with large histories
-        commits=$(git rev-list "$newrev" --not --branches='*' --remotes='*' 2>/dev/null || git rev-list "$newrev")
+        # Fallback uses --not --all to exclude commits already in the repository
+        commits=$(git rev-list "$newrev" --not --branches='*' --remotes='*' 2>/dev/null || git rev-list "$newrev" --not --all 2>/dev/null || echo "")
     else
         # For existing branches, only validate new commits
         range="$oldrev..$newrev"
         commits=$(git rev-list "$range")
+    fi
+    
+    # Skip if no commits to validate
+    if [[ -z "$commits" ]]; then
+        continue
     fi
     
     # Iterate through each commit
