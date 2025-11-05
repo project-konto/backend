@@ -91,7 +91,7 @@ validate_commit_message() {
     # The type must be one of the valid types
     # The scope is optional and must be in parentheses
     # There must be a colon followed by a space
-    # The subject must exist and not end with a period
+    # The subject must exist
     
     # Regular expression for Conventional Commits format
     # ^(type)(\(scope\))?: subject$
@@ -123,34 +123,27 @@ validate_commit_message() {
             fi
         fi
         
-        if echo "$subject_line" | grep -qE ": [A-Z]"; then
-            print_error "  → Subject should start with lowercase letter"
-        fi
-        
-        if echo "$subject_line" | grep -qE "\.$"; then
-            print_error "  → Subject should not end with a period"
-        fi
-        
         echo "" >&2
         return $EXIT_FAILURE
     fi
     
-    # Additional check: subject should not end with a period
-    if echo "$subject_line" | grep -qE "\.$"; then
-        print_error "Invalid commit message in commit ${commit_sha:0:7}"
-        echo -e "${YELLOW}Commit message:${NC}" >&2
-        echo "$subject_line" >&2
-        print_error "  → Subject should not end with a period" >&2
-        echo "" >&2
-        return $EXIT_FAILURE
-    fi
-    
-    # Additional check: subject should start with lowercase (after ": ")
+    # Additional validations for messages that match the basic pattern
+    # Check if subject starts with uppercase (after ": ")
     if echo "$subject_line" | grep -qE ": [A-Z]"; then
         print_error "Invalid commit message in commit ${commit_sha:0:7}"
         echo -e "${YELLOW}Commit message:${NC}" >&2
         echo "$subject_line" >&2
         print_error "  → Subject should start with lowercase letter" >&2
+        echo "" >&2
+        return $EXIT_FAILURE
+    fi
+    
+    # Check if subject ends with a period
+    if echo "$subject_line" | grep -qE "\.$"; then
+        print_error "Invalid commit message in commit ${commit_sha:0:7}"
+        echo -e "${YELLOW}Commit message:${NC}" >&2
+        echo "$subject_line" >&2
+        print_error "  → Subject should not end with a period" >&2
         echo "" >&2
         return $EXIT_FAILURE
     fi
@@ -170,12 +163,12 @@ while read oldrev newrev refname; do
         continue
     fi
     
-    # If this is a new branch, compare against the empty tree
+    # If this is a new branch, only validate commits not in any other branch
+    # This avoids re-validating the entire history for branches created from existing branches
     if [ "$oldrev" = "0000000000000000000000000000000000000000" ]; then
-        # For new branches, we might want to validate all commits
-        # or just skip validation. Here we'll validate all commits.
-        range="$newrev"
-        commits=$(git rev-list "$range")
+        # Get commits that are new to the repository (not in any other ref)
+        # This is efficient even for new branches with large histories
+        commits=$(git rev-list "$newrev" --not --branches='*' --remotes='*' 2>/dev/null || git rev-list "$newrev")
     else
         # For existing branches, only validate new commits
         range="$oldrev..$newrev"
