@@ -12,7 +12,22 @@ Conventional Commits is a specification for adding human and machine-readable me
 
 ### Installation
 
-#### On a Git Server (Bare Repository)
+#### Quick Installation (Recommended)
+
+Use the provided installation script:
+
+```bash
+cd .github/hooks
+./install.sh /path/to/repository.git
+```
+
+The script will:
+- Verify the target repository exists
+- Backup any existing pre-receive hook
+- Copy and configure the hook
+- Set proper permissions
+
+#### Manual Installation
 
 1. Copy the hook to your bare repository's hooks directory:
    ```bash
