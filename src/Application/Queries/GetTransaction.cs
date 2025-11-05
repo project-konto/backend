@@ -6,8 +6,7 @@ namespace KontoApi.Application.Queries;
 public class GetTransactionsQuery
 {
     public Guid AccountId { get; init; }
-    public DateTime? StartDate { get; init; }
-    public DateTime? EndDate { get; init; }
+    public DateRange? DateRange { get; init; }
     public TransactionType? Type { get; init; }
     public string? Category { get; init; }
     public double? MinAmount { get; init; }
@@ -25,6 +24,19 @@ public class TransactionDto
     public string Description { get; init; } = "";
 }
 
+public record DateRange(DateTime Start, DateTime End)
+{
+    public static DateRange Create(DateTime? start, DateTime? end)
+    {
+        var from = start ?? DateTime.MinValue;
+        var to = end ?? DateTime.MaxValue;
+        
+        if (from > to)
+            throw new ArgumentException("Start date must be before end date");
+        return new DateRange(from, to);
+    }
+}
+
 public class GetTransactionsHandler
 {
     private readonly ITransactionRepository transactionRepository;
@@ -36,10 +48,8 @@ public class GetTransactionsHandler
 
     public async Task<IEnumerable<TransactionDto>> Handle(GetTransactionsQuery query)
     {
-        var start = query.StartDate ?? DateTime.MinValue;
-        var end = query.EndDate ?? DateTime.MaxValue;
-        
-        var transactions = await transactionRepository.GetByFilterAsync(query.AccountId, start, end);
+        var range = query.DateRange ?? DateRange.Create(null, null);
+        var transactions = await transactionRepository.GetByFilterAsync(query.AccountId, range.Start, range.End);
         var filtered = transactions.AsQueryable();
         
         if (query.Type.HasValue)

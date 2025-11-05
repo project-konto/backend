@@ -2,7 +2,7 @@
 
 namespace KontoApi.Application.DTOs;
 
-public class ParsedOperation
+public class ParsedTransaction
 {
     public DateTime Date { get; init; }
     public decimal Amount { get; init; }

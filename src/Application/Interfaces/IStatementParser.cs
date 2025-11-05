@@ -4,5 +4,5 @@ namespace KontoApi.Application.Interfaces;
 
 public interface IStatementParser
 {
-    IEnumerable<ParsedOperation> Parse(Stream fileStream);
+    IEnumerable<ParsedTransaction> Parse(Stream fileStream);
 }
