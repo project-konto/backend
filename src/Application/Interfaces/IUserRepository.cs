@@ -1,7 +1,10 @@
-﻿namespace KontoApi.Application.Interfaces;
+﻿using KontoApi.Domain;
+
+namespace KontoApi.Application.Interfaces;
 
 public interface IUserRepository
 {
     Task AddAsync(User user);
-    Task<User?> FindByEmailAsync(string email); // checks if email exists
+    Task<User?> FindByEmailAsync(string email);
+    Task<User> GetByIdAsync(Guid userId);
 }

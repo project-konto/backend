@@ -1,18 +1,19 @@
 ﻿using KontoApi.Application.Interfaces;
+using KontoApi.Domain;
 
 namespace KontoApi.Application.Users;
 
 public class LoginUserCommand
 {
-    // Gets data (email, password) from UI and sends to handler
-    public string Email { get; }
-    public string Password { get; }
+    public string Email { get; init; }
+    public string Password { get; init; }
+}
 
-    public LoginUserCommand(string email, string password)
-    {
-        Email = email;
-        Password = password;
-    }
+public class LoginUserDto
+{
+    public Guid UserId { get; init; }
+    public string Name { get; init; }
+    public string Email { get; init; }
 }
 
 public class LoginUserHandler
@@ -26,37 +27,29 @@ public class LoginUserHandler
         passwordHasher = hasher;
     }
     
-    public async Task<LoginUserResult> Handle(LoginUserCommand command)
+    public async Task<LoginUserDto> Handle(LoginUserCommand command)
     {
-        var email = command.Email.Trim();
-        var user = await usersRepository.FindByEmailAsync(email);
-        
-        if (user == null)
-            return new LoginUserResult("Invalid email or password");
-        
-        var isPasswordCorrect = passwordHasher.Verify(email, command.Password, user.PasswordHash);
-        if (!isPasswordCorrect)
-            return new LoginUserResult("Invalid email or password");
+       var user = await usersRepository.FindByEmailAsync(command.Email);
+       if (user == null)
+           throw new InvalidOperationException("Email or password is incorrect");
 
-        return new LoginUserResult(user.Id);
+       var hash = GetHashPassword(user);
+       if (!passwordHasher.Verify(command.Password, hash))
+           throw new InvalidOperationException("Invalid email or password");
+
+       return new LoginUserDto
+       {
+           UserId = user.Id,
+           Name = user.Name,
+           Email = user.Email
+       };
     }
-}
 
-public class LoginUserResult
-{
-    public bool IsSuccess { get; }
-    public Guid? UserId { get; }
-    public string? ErrorMessage { get; }
-
-    public LoginUserResult(Guid? userId)
+    private static string GetHashPassword(User user)
     {
-        IsSuccess = true;
-        UserId = userId;
-    }
-    
-    public LoginUserResult(string errorMessage)
-    {
-        IsSuccess = false;
-        ErrorMessage = errorMessage;;
+        var property = typeof(User).GetProperty("HashedPassword", 
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        
+        return (string)property!.GetValue(user);
     }
 }
