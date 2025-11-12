@@ -19,7 +19,6 @@ public class Money : IEquatable<Money>, IComparable<Money>
         throw new NotImplementedException();
     }
 
-    public static Money operator +(Money x, Money y) => new Money(x.Value + x.Value, x.Currency);
-    public static Money operator -(Money x, Money y) => new Money(x.Value - x.Value, x.Currency);
-    public static Money operator *(Money x, Money y) => new Money(x.Value * y.Value, x.Currency);
+    public static Money operator +(Money firstItem, Money secondItem) => new Money(firstItem.Value + secondItem.Value, firstItem.Currency);
+    public static Money operator -(Money firstItem, Money secondItem) => new Money(firstItem.Value - secondItem.Value, firstItem.Currency);
 }
