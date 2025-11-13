@@ -9,5 +9,5 @@ public class ParsedTransaction
     public string Currency { get; init; } = "";
     public string? Description { get; init; }
     public string? ExternalId { get; init; }
-    public Category? Category { get; init; }
+    public Category? CategoryName { get; init; }
 }

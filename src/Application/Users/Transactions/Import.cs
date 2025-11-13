@@ -52,7 +52,7 @@ public class ImportTransactionsHandler
                     continue;
                 }
 
-                var category = operation.Category ?? new Category("Uncategorized"); // temporary 
+                var category = operation.CategoryName ?? new Category("Uncategorized"); // temporary 
                 var money = new Money(Math.Abs((double)operation.Amount), operation.Currency);
                 var type = operation.Amount > 0 ? TransactionType.Income : TransactionType.Expense;
                 var transaction = new Transaction(money, type, category, operation.Date,
