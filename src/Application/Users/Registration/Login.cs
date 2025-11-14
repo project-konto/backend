@@ -33,7 +33,7 @@ public class LoginUserHandler
        if (user == null)
            throw new InvalidOperationException("Email or password is incorrect");
 
-       var hash = GetHashPassword(user);
+       var hash = user.HashedPassword;
        if (!passwordHasher.Verify(command.Password, hash))
            throw new InvalidOperationException("Invalid email or password");
 
@@ -43,13 +43,5 @@ public class LoginUserHandler
            Name = user.Name,
            Email = user.Email
        };
-    }
-
-    private static string GetHashPassword(User user)
-    {
-        var property = typeof(User).GetProperty("HashedPassword", 
-            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-        
-        return (string)property!.GetValue(user);
     }
 }
