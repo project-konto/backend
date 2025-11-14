@@ -5,7 +5,7 @@ public class User
     public Guid Id { get; private set; }
     public string Name { get; private set; }
     public string Email { get; private set; }
-    private string HashedPassword { get; set; }
+    public string HashedPassword { get; private set; }
 
     private readonly List<Budget> _budgets = new List<Budget>();
 
