@@ -4,12 +4,12 @@ namespace KontoApi.Infrastructure;
 
 public class PasswordHasher : IPasswordHasher
 {
-    public String Hash(String password)
+    public string Hash(string password)
     {
         throw new NotImplementedException();
     }
 
-    public Boolean Verify(String password, String hash)
+    public bool Verify(string password, string hash)
     {
         throw new NotImplementedException();
     }

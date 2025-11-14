@@ -1,6 +1,7 @@
 ﻿using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
 
+
 namespace KontoApi.Infrastructure;
 
 public class UserRepository : IUserRepository

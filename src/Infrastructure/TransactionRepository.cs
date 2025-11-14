@@ -20,7 +20,7 @@ public class TransactionRepository : ITransactionRepository
         throw new NotImplementedException();
     }
 
-    public Task<Boolean> ExistsAsync(Guid transactionId)
+    public Task<bool> ExistsAsync(Guid transactionId)
     {
         throw new NotImplementedException();
     }
