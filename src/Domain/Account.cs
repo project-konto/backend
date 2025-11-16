@@ -8,6 +8,8 @@ public class Account
 
    public Account(User user, Budget[] budgets)
    {
-      throw new NotImplementedException();
+      User = user;
+      Budgets = budgets;
+      Id = Guid.NewGuid();
    }
 }

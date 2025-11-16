@@ -9,6 +9,8 @@ public class Budget
 
     public Budget(Money currentBalance, Transaction[] transactions)
     {
-        throw new NotImplementedException();
+        CurrentBalance = currentBalance;
+        Transactions = transactions;
+        Id = Guid.NewGuid();
     }
 }

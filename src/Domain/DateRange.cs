@@ -9,13 +9,12 @@ public class DateRange: IEquatable<DateRange>, IComparable<DateRange>
     
     public DateRange(DateTime startDate, DateTime endDate)
     {
-        throw new NotImplementedException();
+        StartDate = startDate;
+        EndDate = endDate;
     }
 
-    public bool Equals(DateRange? other)
-    {
-        throw new NotImplementedException();
-    }
+    public bool Equals(DateRange other) => EndDate == other.EndDate && StartDate == other.StartDate;
+    
 
     public int CompareTo(DateRange? other)
     {

@@ -7,13 +7,15 @@ public class User
     public string Email { get; private set; }
     public string HashedPassword { get; private set; }
 
-    private readonly List<Budget> _budgets = new List<Budget>();
+    private readonly List<Budget> budgets = new List<Budget>();
 
     
     public User(Guid id, string name, string email, string hashedPassword)
     {
-        throw new NotImplementedException();
-
+        Id = id;
+        Name = name;
+        Email = email;
+        HashedPassword = hashedPassword;
     }
 
     public static User Register(string name, string email, string password)
@@ -23,7 +25,6 @@ public class User
 
     public void ChangeName(string newName)
     {
-        throw new NotImplementedException();
+        Name = newName;
     }
-
 }
