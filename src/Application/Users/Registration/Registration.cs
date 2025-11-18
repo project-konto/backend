@@ -35,12 +35,11 @@ public class RegisterUserHandler
             throw new InvalidOperationException($"User with email {command.Email} already exists");
 
         var hashed = passwordHasher.Hash(command.Password);
-        var user = new User(Guid.NewGuid(), command.Name, command.Email, hashed);
+        var user = new User(command.Name, command.Email, hashed);
         
         await usersRepository.AddAsync(user);
         return new RegisterUserDto
         {
-            UserId = user.Id,
             Name = user.Name,
             Email = user.Email
         };

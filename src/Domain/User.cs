@@ -10,17 +10,12 @@ public class User
     private readonly List<Budget> budgets = new List<Budget>();
 
     
-    public User(Guid id, string name, string email, string hashedPassword)
+    public User(string name, string email, string hashedPassword)
     {
-        Id = id;
+        Id = Guid.NewGuid();
         Name = name;
         Email = email;
         HashedPassword = hashedPassword;
-    }
-
-    public static User Register(string name, string email, string password)
-    {
-        throw new NotImplementedException();
     }
 
     public void ChangeName(string newName)
