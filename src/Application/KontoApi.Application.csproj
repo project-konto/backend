@@ -1,26 +1,26 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <ItemGroup>
-    <ProjectReference Include="..\Domain\KontoApi.Domain.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Domain\KontoApi.Domain.csproj"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="Class1.cs" />
-    <Compile Remove="Users\RegisterUser\**" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="Class1.cs"/>
+        <Compile Remove="Users\RegisterUser\**"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Remove="Users\RegisterUser\**" />
-  </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Remove="Users\RegisterUser\**"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Users\RegisterUser\**" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Remove="Users\RegisterUser\**"/>
+    </ItemGroup>
 
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
 
 </Project>

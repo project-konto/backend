@@ -2,31 +2,74 @@ namespace KontoApi.Domain;
 
 public class Money : IEquatable<Money>, IComparable<Money>
 {
-    public double Value { get; private set; }
-    public string Currency { get; private set; }
-    const double Epsilon = 0.0000001;
+	public decimal Value { get; }
+	public string Currency { get; }
 
 
-    public Money(double value, string currency)
-    {
-        Value = value;
-        Currency = currency;
-    }
+	public Money(decimal value, string currency)
+	{
+		if (string.IsNullOrWhiteSpace(currency))
+			throw new ArgumentNullException(nameof(currency), "Currency cannot be empty");
+		if (currency.Length != 3)
+			throw new ArgumentOutOfRangeException(nameof(currency), "Currency must be a 3-character ISO code");
 
-    public bool Equals(Money other) => Math.Abs(Value - other.Value) < Epsilon && Currency == other.Currency;
+		Value = value;
+		Currency = currency.Trim().ToUpperInvariant();
+	}
 
-    public int CompareTo(Money other)
-    {
-        if (ReferenceEquals(this, other)) return 0;
-        if (ReferenceEquals(null, other)) return 1;
-        return this.Currency == other.Currency
-            ? Value.CompareTo(other.Value)
-            : throw new ArgumentException($"Cannot compare {nameof(Money)} with {nameof(Currency)}.");
-    }
+	public bool Equals(Money? other)
+		=> other != null
+		   && Value == other.Value
+		   && Currency == other.Currency;
 
-    public static Money operator +(Money firstItem, Money secondItem) =>
-        new Money(firstItem.Value + secondItem.Value, firstItem.Currency);
+	public override bool Equals(object? obj)
+		=> obj is Money other && Equals(other);
 
-    public static Money operator -(Money firstItem, Money secondItem) =>
-        new Money(firstItem.Value - secondItem.Value, firstItem.Currency);
+	public override int GetHashCode()
+		=> HashCode.Combine(Value, Currency);
+
+	public int CompareTo(Money? other)
+	{
+		if (ReferenceEquals(this, other))
+			return 0;
+
+		if (ReferenceEquals(null, other))
+			return 1;
+
+		return Currency == other.Currency
+			? Value.CompareTo(other.Value)
+			: throw new ArgumentException($"Cannot compare {other.Currency} with {Currency}");
+	}
+
+	public static Money operator +(Money first, Money second) =>
+		first.Currency != second.Currency
+			? throw new ArgumentException($"Cannot add {first.Currency} and {second.Currency}")
+			: new(first.Value + second.Value, first.Currency);
+
+
+	public static Money operator -(Money first, Money second) =>
+		first.Currency != second.Currency
+			? throw new ArgumentException($"Cannot subtract {second.Currency} from {first.Currency}")
+			: new(first.Value - second.Value, first.Currency);
+
+	public static bool operator ==(Money? left, Money? right)
+		=> Equals(left, right);
+
+	public static bool operator !=(Money? left, Money? right)
+		=> !Equals(left, right);
+
+	public static bool operator >(Money left, Money right)
+		=> left.CompareTo(right) > 0;
+
+	public static bool operator <(Money left, Money right)
+		=> left.CompareTo(right) < 0;
+
+	public static bool operator >=(Money left, Money right)
+		=> left.CompareTo(right) >= 0;
+
+	public static bool operator <=(Money left, Money right)
+		=> left.CompareTo(right) <= 0;
+
+	public override string ToString()
+		=> $"{Value:F2} {Currency}";
 }
