@@ -1,5 +1,6 @@
 namespace KontoApi.Domain;
 
+
 public class User
 {
     public Guid Id { get; private set; }
