@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace KontoApi.Api.Controllers;
 
-public class TransactionController: BaseController
+public class TransactionController : BaseController
 {
     private readonly ITransactionRepository _repository;
 
@@ -25,14 +25,14 @@ public class TransactionController: BaseController
     public IActionResult Get(Guid id)
     {
         // TO DO 
-/        return Ok();
+        return Ok();
     }
 
     [HttpGet]
     public IActionResult Get()
     {
         // TO DO
-        return Ok(new List<TransactionResponse>());    
+        return Ok(new List<TransactionResponse>());
     }
-    
+
 }
