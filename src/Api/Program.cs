@@ -1,9 +1,11 @@
+using FluentValidation.AspNetCore;
+using KontoApi.Api.Validators;
 using KontoApi.Application.Interfaces;
 using KontoApi.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<CreateTransactionRequestValidator>());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 

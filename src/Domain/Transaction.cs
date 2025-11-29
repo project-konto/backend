@@ -14,7 +14,7 @@ public class Transaction
     public Money Amount { get; private set; }
     public Category TransactionCategory { get; private set; }
     public DateTime Date { get; private set; }
-    public string Description { get; private set; }
+    public string? Description { get; private set; }
 
     public Transaction(Money amount, TransactionType type, Category category, DateTime date, string? description = null)
     {
