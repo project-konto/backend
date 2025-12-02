@@ -14,7 +14,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<TransactionEnti
             .WithOne()
             .HasForeignKey<TransactionEntity>(category => category.CategoryId)
             .HasPrincipalKey<CategoryEntity>(user => user.Id);
-        
+
         builder
             .HasOne(transaction => transaction.BudgetEntity)
             .WithOne()

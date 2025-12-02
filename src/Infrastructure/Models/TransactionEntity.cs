@@ -12,7 +12,7 @@ public class TransactionEntity
     public BudgetEntity? BudgetEntity { get; set; }
     public CategoryEntity? CategoryEntity { get; set; }
     public TransactionTypesEntity? TransactionTypesEntity { get; set; }
-    
+
     public void SetTypeTransaction(string typeTransactionName)
     {
         TransactionTypeName = typeTransactionName;
