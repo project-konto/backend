@@ -9,7 +9,7 @@ public class KontoDbContext : DbContext
 {
     public KontoDbContext(DbContextOptions<KontoDbContext> options) : base(options) { }
     public KontoDbContext() { }
-    
+
     public DbSet<AccountEntity> Account { get; set; }
     public DbSet<BudgetEntity> Budget { get; set; }
     public DbSet<CategoryEntity> Category { get; set; }
@@ -19,13 +19,11 @@ public class KontoDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        if (!optionsBuilder.IsConfigured)
-        {
-            var connectionString = 
-                "Host=localhost;port=5432;Database=KontoDb;Username=konto;Password=konto;";
-            optionsBuilder.UseNpgsql(connectionString);
-            optionsBuilder.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
-        }
+        if (optionsBuilder.IsConfigured) return;
+
+        const string connectionString = "Host=localhost;port=5432;Database=KontoDb;Username=konto;Password=konto;";
+        optionsBuilder.UseNpgsql(connectionString);
+        optionsBuilder.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -36,7 +34,7 @@ public class KontoDbContext : DbContext
         modelBuilder.ApplyConfiguration(new TransactionConfiguration());
         modelBuilder.ApplyConfiguration(new TransactionTypesConfiguration());
         modelBuilder.ApplyConfiguration(new UserConfiguration());
-        
+
         base.OnModelCreating(modelBuilder);
     }
 }
