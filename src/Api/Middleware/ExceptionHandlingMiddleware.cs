@@ -2,6 +2,7 @@ using System.Net;
 using System.Text.Json;
 using KontoApi.Api.Contracts;
 using Serilog;
+using KontoApi.Application.Exceptions;
 
 namespace KontoApi.Api.Middleware;
 
@@ -23,14 +24,24 @@ public class ExceptionHandlingMiddleware(RequestDelegate next)
 
     private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        Log.Error(exception, "Произошла необработанная ошибка");
+
+        var (statusCode, title) = exception switch
+        {
+            NotFoundException => (HttpStatusCode.NotFound, "Resource Not Found"),
+            BadRequestException => (HttpStatusCode.BadRequest, "Bad Request"),
+            ValidationException => (HttpStatusCode.BadRequest, "Bad Request"),
+            _ => (HttpStatusCode.InternalServerError, "Internal Server Error")
+        };
+
+        if (statusCode == HttpStatusCode.InternalServerError)
+            Log.Error(exception, "Произошла необработанная ошибка");
 
         context.Response.ContentType = "application/json";
-        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+        context.Response.StatusCode = (int)statusCode;
 
         var response = new ErrorResponse(
             context.Response.StatusCode,
-            "Внутренняя ошибка сервера",
+            title,
             exception.Message
         );
 
