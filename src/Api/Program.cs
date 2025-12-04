@@ -15,7 +15,6 @@ try
     Log.Information("Starting web application");
 
     var builder = WebApplication.CreateBuilder(args);
-
     builder.Services.AddHealthChecks();
     builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
@@ -60,11 +59,8 @@ try
     });
 
     var app = builder.Build();
-
-
     app.UseSerilogRequestLogging(); // Логирование запросов
     app.UseMiddleware<ExceptionHandlingMiddleware>();
-
 
     if (app.Environment.IsDevelopment())
     {
