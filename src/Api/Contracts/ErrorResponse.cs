@@ -2,9 +2,9 @@ namespace KontoApi.Api.Contracts;
 
 public class ErrorResponse
 {
-    private int StatusCode { get; set; }
-    private string Message { get; set; }
-    private string? Details { get; set; }
+    public int StatusCode { get; private set; }
+    public string Message { get; private set; }
+    public string? Details { get; private set; }
 
     public ErrorResponse(int statusCode, string message, string? details)
     {
