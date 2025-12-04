@@ -1,3 +1,5 @@
+using System.Diagnostics;
+
 namespace KontoApi.Domain;
 
 public enum TransactionType
@@ -30,6 +32,11 @@ public class Transaction
         TransactionCategory = category;
         Date = date;
         Description = description?.Trim() ?? string.Empty;
+    }
+
+    private Transaction()
+    {
+        ; // For ORM
     }
 
     public void UpdateCategory(Category newCategory)

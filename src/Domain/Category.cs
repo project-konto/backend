@@ -12,6 +12,11 @@ public class Category : IComparable<Category>, IEquatable<Category>
         Name = name.Trim();
     }
 
+    private Category()
+    {
+        ; // For ORM
+    }
+
     public void Rename(string newName)
     {
         ValidateName(newName, nameof(newName));

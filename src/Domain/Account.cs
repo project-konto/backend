@@ -1,14 +1,28 @@
 namespace KontoApi.Domain;
 
-public class Account(User user)
+public class Account
 {
-    public Guid Id { get; private set; } = Guid.NewGuid();
-    public User User { get; private set; } = user ?? throw new ArgumentNullException(nameof(user));
-    public DateTime CreatedAt { get; private set; } = DateTime.UtcNow;
-    public DateTime UpdatedAt { get; private set; } = DateTime.UtcNow;
+    public Guid Id { get; private set; }
+    public User User { get; private set; }
+    public DateTime CreatedAt { get; private set; }
+    public DateTime UpdatedAt { get; private set; }
 
     private readonly List<Budget> budgets = [];
     public IReadOnlyCollection<Budget> Budgets => budgets.AsReadOnly();
+
+    public Account(User user)
+    {
+        Id = Guid.NewGuid();
+        User = user ?? throw new ArgumentNullException(nameof(user));
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    private Account()
+    {
+        ; // For ORM
+    }
+
 
     public void AddBudget(Budget budget)
     {

@@ -21,6 +21,12 @@ public class Budget
         CurrentBalance = initialBalance ?? throw new ArgumentNullException(nameof(initialBalance));
     }
 
+    private Budget()
+    {
+        ; // For ORM
+    }
+
+
     public void AddTransaction(Transaction transaction)
     {
         ArgumentNullException.ThrowIfNull(transaction);

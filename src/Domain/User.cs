@@ -30,6 +30,11 @@ public class User
         CreatedAt = DateTime.UtcNow;
     }
 
+    private User()
+    {
+        ; // For ORM
+    }
+
     public void ChangeName(string newName)
     {
         if (string.IsNullOrWhiteSpace(newName))
