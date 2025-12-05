@@ -4,7 +4,7 @@ namespace KontoApi.Infrastructure;
 
 public class BudgetRepository : IBudgetRepository
 {
-    public Task<Budget?> GetByUserIdAsync(Guid userId)
+    public Task<Budget?> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
     {
         throw new NotImplementedException();
     }
