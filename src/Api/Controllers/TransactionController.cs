@@ -5,34 +5,28 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace KontoApi.Api.Controllers;
 
-public class TransactionController : BaseController
+public class TransactionController(ITransactionRepository repository) : BaseController
 {
-    private readonly ITransactionRepository _repository;
+	private readonly ITransactionRepository repository = repository;
 
-    public TransactionController(ITransactionRepository repository)
-    {
-        _repository = repository;
-    }
+	[HttpPost]
+	public IActionResult Create([FromBody] CreateTransactionRequest transaction)
+	{
+		// TODO
+		return Ok();
+	}
 
-    [HttpPost]
-    public IActionResult Create([FromBody] CreateTransactionRequest transaction)
-    {
-        // TO DO
-        return Ok();
-    }
+	[HttpGet("{id}")]
+	public IActionResult Get(Guid id)
+	{
+		// TODO 
+		return Ok();
+	}
 
-    [HttpGet("{id}")]
-    public IActionResult Get(Guid id)
-    {
-        // TO DO 
-        return Ok();
-    }
-
-    [HttpGet]
-    public IActionResult Get()
-    {
-        // TO DO
-        return Ok(new List<TransactionResponse>());
-    }
-
+	[HttpGet]
+	public IActionResult Get()
+	{
+		// TODO
+		return Ok(new List<TransactionResponse>());
+	}
 }

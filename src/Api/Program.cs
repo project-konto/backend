@@ -1,9 +1,9 @@
 using System.Text;
+using FluentValidation;
 using FluentValidation.AspNetCore;
 using KontoApi.Api.Middleware;
 using KontoApi.Api.Validators;
 using KontoApi.Application.Interfaces;
-using KontoApi.Application.Queries;
 using KontoApi.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -20,9 +20,10 @@ try
     builder.Services.AddHealthChecks();
     builder.Host.UseSerilog((context, configuration)
         => configuration.ReadFrom.Configuration(context.Configuration));
-
-    builder.Services.AddControllers().AddFluentValidation(fv =>
-        fv.RegisterValidatorsFromAssemblyContaining<CreateTransactionRequestValidator>());
+    
+    builder.Services.AddControllers();
+    builder.Services.AddFluentValidationAutoValidation();
+    builder.Services.AddValidatorsFromAssemblyContaining<CreateTransactionRequestValidator>();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
 
