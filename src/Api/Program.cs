@@ -7,6 +7,7 @@ using KontoApi.Application.Queries;
 using KontoApi.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 
@@ -16,6 +17,13 @@ try
     Log.Information("Starting web application");
 
     var builder = WebApplication.CreateBuilder(args);
+    var configuration = builder.Configuration;
+
+    builder.Services.AddDbContext<KontoDbContext>(
+        options =>
+        {
+            options.UseNpgsql(configuration.GetConnectionString(nameof(KontoDbContext)));
+        });
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddHealthChecks();
     builder.Host.UseSerilog((context, configuration)

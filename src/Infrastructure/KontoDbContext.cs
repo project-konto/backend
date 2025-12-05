@@ -17,15 +17,6 @@ public class KontoDbContext : DbContext
     public DbSet<UserEntity> User { get; set; }
     public DbSet<TransactionTypesEntity> TransactionTypes { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (optionsBuilder.IsConfigured) return;
-
-        const string connectionString = "Host=localhost;port=5432;Database=KontoDb;Username=konto;Password=konto;";
-        optionsBuilder.UseNpgsql(connectionString);
-        optionsBuilder.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new AccountConfiguration());
