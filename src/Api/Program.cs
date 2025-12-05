@@ -16,8 +16,10 @@ try
     Log.Information("Starting web application");
 
     var builder = WebApplication.CreateBuilder(args);
+    builder.Services.AddHttpContextAccessor();
     builder.Services.AddHealthChecks();
-    builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
+    builder.Host.UseSerilog((context, configuration)
+        => configuration.ReadFrom.Configuration(context.Configuration));
 
     builder.Services.AddControllers().AddFluentValidation(fv =>
         fv.RegisterValidatorsFromAssemblyContaining<CreateTransactionRequestValidator>());
@@ -60,7 +62,15 @@ try
     });
 
     var app = builder.Build();
-    app.UseSerilogRequestLogging(); // Логирование запросов
+    app.UseSerilogRequestLogging(options =>
+    {
+        options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+        {
+            diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+            diagnosticContext.Set("RequestScheme", httpContext.Request.Scheme);
+            diagnosticContext.Set("UserAgent", httpContext.Request.Headers["User-Agent"].FirstOrDefault());
+        };
+    });
     app.UseMiddleware<ExceptionHandlingMiddleware>();
 
     if (app.Environment.IsDevelopment())

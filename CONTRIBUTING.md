@@ -25,3 +25,26 @@ This will install Husky git hooks that automatically enforce Conventional Commit
 ## Commit Message Format
 
 All commits must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification. The commit message hook will prevent invalid commits locally, and CI will verify all commits in pull requests
+
+## Logging
+
+We use **Serilog** for structured logging. Inject `ILogger<T>` in your class:
+
+```csharp
+public class Service
+{
+    private readonly ILogger<Service> loger;
+
+    public Service(ILogger<Service> logger)
+    {
+        this.loger = logger;
+    }
+
+    public void DoWork(int userId)
+    {
+        loger.LogInformation("Processing user {UserId}", userId);
+    }
+}
+```
+
+Available log levels: `LogDebug`, `LogInformation`, `LogWarning`, `LogError`, `LogCritical`
