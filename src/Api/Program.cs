@@ -72,10 +72,17 @@ try
     builder.Services.AddScoped<RegisterUserHandler>();
     builder.Services.AddScoped<LoginUserHandler>();
     
+    var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
     builder.Services.AddCors(options =>
     {
-        options.AddPolicy("AllowFrontend",
-            policy => policy.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod());
+        options.AddPolicy("AllowFrontend", policy =>
+        {
+            if (allowedOrigins.Length == 0)
+                policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+
+            else
+                policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod();
+        });
     });
 
     var app = builder.Build();
