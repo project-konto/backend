@@ -6,8 +6,6 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace KontoApi.Api.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
 public class AuthController : BaseController
 {
     private readonly RegisterUserHandler registerHandler;

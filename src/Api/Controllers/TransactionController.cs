@@ -7,8 +7,6 @@ using DateRange = KontoApi.Application.Queries.DateRange;
 
 namespace KontoApi.Api.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
 public class TransactionController : BaseController
 {
 	private readonly AddTransactionHandler addHandler;
