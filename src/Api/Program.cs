@@ -4,12 +4,13 @@ using FluentValidation.AspNetCore;
 using KontoApi.Api.Middleware;
 using KontoApi.Api.Validators;
 using KontoApi.Application.Interfaces;
+using KontoApi.Application.Queries;
+using KontoApi.Application.Users.Transactions;
 using KontoApi.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-
 
 Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateBootstrapLogger();
 try
@@ -63,6 +64,10 @@ try
     builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     builder.Services.AddScoped<ITokenService, TokenService>();
+    builder.Services.AddScoped<AddTransactionHandler>();
+    builder.Services.AddScoped<GetTransactionsHandler>();
+    builder.Services.AddScoped<DeleteTransactionHandler>();
+    builder.Services.AddScoped<ImportTransactionsHandler>();
 
     builder.Services.AddCors(options =>
     {
