@@ -1,4 +1,5 @@
-﻿using KontoApi.Application.Interfaces;
+﻿using KontoApi.Application.Exceptions;
+using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
 
 namespace KontoApi.Application.Queries;
@@ -32,7 +33,7 @@ public record DateRange(DateTime Start, DateTime End)
         var to = end ?? DateTime.MaxValue;
 
         if (from > to)
-            throw new ArgumentException("Start date must be before end date");
+            throw new ValidationException("Start date must be before end date");
         return new(from, to);
     }
 }

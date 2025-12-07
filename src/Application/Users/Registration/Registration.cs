@@ -1,4 +1,5 @@
-﻿using KontoApi.Application.Interfaces;
+﻿using KontoApi.Application.Exceptions;
+using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
 
 namespace KontoApi.Application.Users;
@@ -32,7 +33,7 @@ public class RegisterUserHandler
     {
         var existingUser = await usersRepository.FindByEmailAsync(command.Email);
         if (existingUser != null)
-            throw new InvalidOperationException($"User with email {command.Email} already exists");
+            throw new ConflictException($"User with email {command.Email} already exists");
 
         var hashed = passwordHasher.Hash(command.Password);
         var user = new User(command.Name, command.Email, hashed);

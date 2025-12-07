@@ -1,4 +1,5 @@
-﻿using KontoApi.Application.Interfaces;
+﻿using KontoApi.Application.Exceptions;
+using KontoApi.Application.Interfaces;
 
 namespace KontoApi.Application.Queries;
 
@@ -24,7 +25,7 @@ public class GetUserHandler
     {
         var user = await userRepository.GetByIdAsync(query.UserId);
         if (user == null)
-            throw new InvalidOperationException("User not found");
+            throw new NotFoundException("User not found");
 
         return new()
         {

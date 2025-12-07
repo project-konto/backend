@@ -27,6 +27,9 @@ public class ExceptionHandlingMiddleware(RequestDelegate next)
 			NotFoundException => (HttpStatusCode.NotFound, "Resource Not Found"),
 			BadRequestException => (HttpStatusCode.BadRequest, "Bad Request"),
 			ValidationException => (HttpStatusCode.BadRequest, "Bad Request"),
+			UnauthorizedException => (HttpStatusCode.Unauthorized, "Unauthorized"),
+			ForbiddenException => (HttpStatusCode.Forbidden, "Forbidden"),
+			ConflictException => (HttpStatusCode.Conflict, "Conflict"),
 			_ => (HttpStatusCode.InternalServerError, "Internal Server Error")
 		};
 

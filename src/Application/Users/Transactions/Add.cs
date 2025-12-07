@@ -1,4 +1,5 @@
-﻿using KontoApi.Application.Interfaces;
+﻿using KontoApi.Application.Exceptions;
+using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
 
 namespace KontoApi.Application.Users.Transactions;
@@ -28,11 +29,11 @@ public class AddTransactionHandler
     public async Task<AddTransactionDto> Handle(AddTransactionCommand command)
     {
         if (command.Amount <= 0)
-            throw new ArgumentException("Amount must be greater than 0");
+            throw new ValidationException("Amount must be greater than 0");
         if (string.IsNullOrWhiteSpace(command.Currency))
-            throw new ArgumentException("Currency is required");
+            throw new ValidationException("Currency is required");
         if (command.Date > DateTime.UtcNow)
-            throw new ArgumentException("Transaction date cannot be in the future");
+            throw new ValidationException("Transaction date cannot be in the future");
 
         var money = new Money(command.Amount, command.Currency);
         var category = new Category(command.Category);

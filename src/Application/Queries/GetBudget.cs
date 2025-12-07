@@ -1,4 +1,5 @@
-﻿using KontoApi.Application.Interfaces;
+﻿using KontoApi.Application.Exceptions;
+using KontoApi.Application.Interfaces;
 
 namespace KontoApi.Application.Queries;
 
@@ -27,7 +28,7 @@ public class GetBudget
         {
             var budget = await budgetRepository.GetByUserIdAsync(query.UserId);
             if (budget == null)
-                throw new InvalidOperationException("Budget not found");
+                throw new NotFoundException("Budget not found");
 
             return new()
             {

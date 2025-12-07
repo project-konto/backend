@@ -1,4 +1,5 @@
-﻿using KontoApi.Application.Interfaces;
+﻿using KontoApi.Application.Exceptions;
+using KontoApi.Application.Interfaces;
 
 namespace KontoApi.Application.Users.Transactions;
 
@@ -23,7 +24,7 @@ public class DeleteTransactionHandler
     {
         var exists = await transactionRepository.ExistsAsync(command.TransactionId);
         if (!exists)
-            throw new InvalidOperationException($"Transaction with id {command.TransactionId} does not exist");
+            throw new NotFoundException($"Transaction with id {command.TransactionId} does not exist");
 
         await transactionRepository.DeleteAsync(command.TransactionId);
         return new()

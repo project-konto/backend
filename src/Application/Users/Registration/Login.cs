@@ -1,4 +1,5 @@
-﻿using KontoApi.Application.Interfaces;
+﻿using KontoApi.Application.Exceptions;
+using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
 
 namespace KontoApi.Application.Users;
@@ -35,7 +36,7 @@ public class LoginUserHandler
 
         var hash = user.HashedPassword;
         if (!passwordHasher.Verify(command.Password, hash))
-            throw new InvalidOperationException("Invalid email or password");
+            throw new BadRequestException("Invalid email or password");
 
         return new()
         {
