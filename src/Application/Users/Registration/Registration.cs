@@ -40,6 +40,7 @@ public class RegisterUserHandler
         await usersRepository.AddAsync(user);
         return new()
         {
+            UserId = user.Id,
             Name = user.Name,
             Email = user.Email
         };

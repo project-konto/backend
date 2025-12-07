@@ -5,6 +5,7 @@ using KontoApi.Api.Middleware;
 using KontoApi.Api.Validators;
 using KontoApi.Application.Interfaces;
 using KontoApi.Application.Queries;
+using KontoApi.Application.Users;
 using KontoApi.Application.Users.Transactions;
 using KontoApi.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -68,7 +69,9 @@ try
     builder.Services.AddScoped<GetTransactionsHandler>();
     builder.Services.AddScoped<DeleteTransactionHandler>();
     builder.Services.AddScoped<ImportTransactionsHandler>();
-
+    builder.Services.AddScoped<RegisterUserHandler>();
+    builder.Services.AddScoped<LoginUserHandler>();
+    
     builder.Services.AddCors(options =>
     {
         options.AddPolicy("AllowFrontend",
