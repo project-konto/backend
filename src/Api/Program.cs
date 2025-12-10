@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -5,6 +6,7 @@ using KontoApi.Api.Middleware;
 using KontoApi.Api.Validators;
 using KontoApi.Application.Interfaces;
 using KontoApi.Application.Queries;
+using KontoApi.Application.Services;
 using KontoApi.Application.Users;
 using KontoApi.Application.Users.Transactions;
 using KontoApi.Infrastructure;
@@ -21,21 +23,32 @@ try
     var builder = WebApplication.CreateBuilder(args);
     var configuration = builder.Configuration;
 
-    builder.Services.AddDbContext<KontoDbContext>(
-        options =>
-        {
-            options.UseNpgsql(configuration.GetConnectionString(nameof(KontoDbContext)));
-        });
+    builder.Services.AddDbContext<KontoDbContext>(options =>
+    {
+        options.UseNpgsql(configuration.GetConnectionString(nameof(KontoDbContext)));
+    });
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddHealthChecks();
-    builder.Host.UseSerilog((context, configuration)
-        => configuration.ReadFrom.Configuration(context.Configuration));
-    
+    builder.Host.UseSerilog((context, loggerConfiguration)
+        => loggerConfiguration.ReadFrom.Configuration(context.Configuration));
+
     builder.Services.AddControllers();
     builder.Services.AddFluentValidationAutoValidation();
     builder.Services.AddValidatorsFromAssemblyContaining<CreateTransactionRequestValidator>();
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    builder.Services.AddSwaggerGen(options =>
+    {
+        options.SwaggerDoc("v1", new()
+        {
+            Title = "KontoApi",
+            Version = "v1",
+            Description = "Personal Finance Management API"
+        });
+
+        var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        options.IncludeXmlComments(xmlPath);
+    });
 
     builder.Services.AddAuthentication(options =>
         {
@@ -65,13 +78,16 @@ try
     builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     builder.Services.AddScoped<ITokenService, TokenService>();
-    builder.Services.AddScoped<AddTransactionHandler>();
-    builder.Services.AddScoped<GetTransactionsHandler>();
-    builder.Services.AddScoped<DeleteTransactionHandler>();
+    builder.Services.AddScoped<IAuthService, AuthService>();
     builder.Services.AddScoped<ImportTransactionsHandler>();
     builder.Services.AddScoped<RegisterUserHandler>();
     builder.Services.AddScoped<LoginUserHandler>();
-    
+    builder.Services.AddScoped<AddTransactionHandler>();
+    builder.Services.AddScoped<GetUserHandler>();
+    builder.Services.AddScoped<GetBudget.GetBudgetHandler>();
+    builder.Services.AddScoped<GetTransactionsHandler>();
+    builder.Services.AddScoped<DeleteTransactionHandler>();
+
     var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
     builder.Services.AddCors(options =>
     {
@@ -110,6 +126,20 @@ try
 
     app.MapHealthChecks("/health");
     app.MapControllers();
+
+    try
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<KontoDbContext>();
+        db.Database.Migrate();
+    }
+    catch (Exception e)
+    {
+        Log.Error(e, "An error occurred while migrating the database");
+        throw;
+    }
+
+
     app.Run();
 }
 catch (Exception ex)

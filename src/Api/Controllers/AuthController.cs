@@ -1,5 +1,5 @@
 ﻿using KontoApi.Api.Contracts;
-using KontoApi.Application.Interfaces;
+using KontoApi.Application.DTOs;
 using KontoApi.Application.Users;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -10,44 +10,22 @@ public class AuthController : BaseController
 {
     private readonly RegisterUserHandler registerHandler;
     private readonly LoginUserHandler loginHandler;
-    private readonly IUserRepository userRepository;
-    private readonly ITokenService tokenService;
 
-    public AuthController(RegisterUserHandler registerHandler, LoginUserHandler loginHandler,
-        IUserRepository userRepository, ITokenService tokenService)
+    public AuthController(RegisterUserHandler registerHandler, LoginUserHandler loginHandler)
     {
         this.registerHandler = registerHandler;
         this.loginHandler = loginHandler;
-        this.userRepository = userRepository;
-        this.tokenService = tokenService;
     }
 
     [HttpPost("register")]
     [AllowAnonymous]
     public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest registerRequest)
     {
-        var command = new RegisterUserCommand
-        {
-            Name = registerRequest.Name,
-            Email = registerRequest.Email,
-            Password = registerRequest.Password,
-        };
-        
-        var result = await registerHandler.Handle(command);
-        var user = await userRepository.GetByIdAsync(result.UserId);
+        var command = new RegisterUserCommand(registerRequest.Name, registerRequest.Email, registerRequest.Password);
 
-        if (user is null)
-            return StatusCode(500, "User not found after registration");
+        var dto = await registerHandler.Handle(command);
+        var response = ToAuthResponse(dto);
 
-        var token = tokenService.GenerateAccessToken(user);
-        var response = new AuthResponse
-        {
-            UserId = result.UserId,
-            Name = result.Name,
-            Email = result.Email,
-            AccessToken = token,
-        };
-        
         return Ok(response);
     }
 
@@ -55,27 +33,19 @@ public class AuthController : BaseController
     [AllowAnonymous]
     public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest loginRequest)
     {
-        var command = new LoginUserCommand
-        {
-            Email = loginRequest.Email,
-            Password = loginRequest.Password,
-        };
-        
-        var loginDto = await loginHandler.Handle(command);
-        var user = await userRepository.GetByIdAsync(loginDto.UserId);
-        
-        if (user is null)
-            return StatusCode(500, "User not found");
-        
-        var token = tokenService.GenerateAccessToken(user);
-        var response = new AuthResponse
-        {
-            UserId = loginDto.UserId,
-            Name = loginDto.Name,
-            Email = loginDto.Email,
-            AccessToken = token,
-        };
-        
+        var command = new LoginUserCommand(loginRequest.Email, loginRequest.Password);
+
+        var dto = await loginHandler.Handle(command);
+        var response = ToAuthResponse(dto);
+
         return Ok(response);
     }
+
+    private static AuthResponse ToAuthResponse(AuthUserDto dto) => new()
+    {
+        UserId = dto.UserId,
+        Name = dto.Name,
+        Email = dto.Email,
+        AccessToken = dto.Token
+    };
 }
