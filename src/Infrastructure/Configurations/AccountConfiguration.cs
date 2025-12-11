@@ -11,8 +11,8 @@ public class AccountConfiguration : IEntityTypeConfiguration<AccountEntity>
         builder.HasKey(account => account.Id);
         builder
             .HasOne(account => account.UserEntity)
-            .WithOne()
-            .HasForeignKey<AccountEntity>(account => account.UserId)
-            .HasPrincipalKey<UserEntity>(user => user.Id);
+            .WithMany()
+            .HasForeignKey(account => account.UserId)
+            .HasPrincipalKey(user => user.Id);
     }
 }

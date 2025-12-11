@@ -4,7 +4,11 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using KontoApi.Api.Middleware;
 using KontoApi.Api.Validators;
+<<<<<<< HEAD
 using KontoApi.Application.Handlers;
+=======
+using KontoApi.Application.Accounts;
+>>>>>>> 40cd7cb (Feat(дохуя где): Implement Account CRUD (Controller, Handlers, Repository)(#45))
 using KontoApi.Application.Interfaces;
 using KontoApi.Application.Services;
 using KontoApi.Infrastructure;
@@ -85,6 +89,11 @@ try
     builder.Services.AddScoped<GetBudgetHandler>();
     builder.Services.AddScoped<GetTransactionsHandler>();
     builder.Services.AddScoped<DeleteTransactionHandler>();
+    builder.Services.AddScoped<IAccountRepository, AccountRepository>();
+    builder.Services.AddScoped<CreateAccountHandler>();
+    builder.Services.AddScoped<GetAccountsHandler>();
+    builder.Services.AddScoped<DeleteAccountHandler>();
+
 
     var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
     builder.Services.AddCors(options =>
