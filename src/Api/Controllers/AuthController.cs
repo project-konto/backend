@@ -1,5 +1,6 @@
 ﻿using KontoApi.Api.Contracts;
 using KontoApi.Application.DTOs;
+using KontoApi.Application.Handlers;
 using KontoApi.Application.Users;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;

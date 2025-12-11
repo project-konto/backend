@@ -4,11 +4,9 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using KontoApi.Api.Middleware;
 using KontoApi.Api.Validators;
+using KontoApi.Application.Handlers;
 using KontoApi.Application.Interfaces;
-using KontoApi.Application.Queries;
 using KontoApi.Application.Services;
-using KontoApi.Application.Users;
-using KontoApi.Application.Users.Transactions;
 using KontoApi.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -84,7 +82,7 @@ try
     builder.Services.AddScoped<LoginUserHandler>();
     builder.Services.AddScoped<AddTransactionHandler>();
     builder.Services.AddScoped<GetUserHandler>();
-    builder.Services.AddScoped<GetBudget.GetBudgetHandler>();
+    builder.Services.AddScoped<GetBudgetHandler>();
     builder.Services.AddScoped<GetTransactionsHandler>();
     builder.Services.AddScoped<DeleteTransactionHandler>();
 
