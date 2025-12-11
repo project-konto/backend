@@ -50,5 +50,4 @@ public class DateRange : IEquatable<DateRange>, IComparable<DateRange>
 
         return new DateRange(start, end);
     }
-
 }
