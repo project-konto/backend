@@ -4,7 +4,7 @@ using KontoApi.Application.Queries;
 using KontoApi.Application.Users.Transactions;
 using KontoApi.Domain;
 using Microsoft.AspNetCore.Mvc;
-using DateRange = KontoApi.Application.Queries.DateRange;
+using GetTransactionsHandler = KontoApi.Application.Handlers.GetTransactionsHandler;
 
 namespace KontoApi.Api.Controllers;
 

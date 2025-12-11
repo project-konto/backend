@@ -1,6 +1,7 @@
 ﻿using KontoApi.Application.DTOs;
 using KontoApi.Application.Interfaces;
 using KontoApi.Application.Queries;
+using KontoApi.Domain;
 
 namespace KontoApi.Application.Handlers;
 
@@ -13,7 +14,7 @@ public class GetTransactionsHandler
     public async Task<IEnumerable<TransactionListDto>> Handle(GetTransactionsQuery query)
     {
         var range = query.DateRange ?? DateRange.Create(null, null);
-        var transactions = await transactionRepository.GetByFilterAsync(query.AccountId, range.Start, range.End);
+        var transactions = await transactionRepository.GetByFilterAsync(query.AccountId, range.StartDate, range.EndDate);
         var filtered = transactions.AsQueryable();
 
         if (query.Type.HasValue)

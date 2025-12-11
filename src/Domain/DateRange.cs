@@ -39,4 +39,16 @@ public class DateRange : IEquatable<DateRange>, IComparable<DateRange>
 
     public override string ToString()
         => $"{StartDate:yyyy-MM-dd} to {EndDate:yyyy-MM-dd}";
+
+    public static DateRange Create(DateTime? startDate, DateTime? endDate)
+    {
+        var start = startDate ?? DateTime.MinValue;
+        var end = endDate ?? DateTime.MaxValue;
+
+        if (start > end)
+            throw new ArgumentException("Start date must be before or equal to end date");
+
+        return new DateRange(start, end);
+    }
+
 }
