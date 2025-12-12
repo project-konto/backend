@@ -24,14 +24,14 @@ public class CategoryController(ICategoryRepository categoryRepository) : BaseCo
     {
         if (string.IsNullOrWhiteSpace(request.Name))
             return BadRequest("Category name is required");
-        
+
         var exists = await categoryRepository.ExistsByNameAsync(request.Name, cancellationToken);
         if (exists)
             return Conflict("Category already exists");
-        
+
         var category = new Category(request.Name);
         await categoryRepository.AddAsync(category, cancellationToken);
-        
+
         return CreatedAtAction(nameof(GetAll), new { id = category.Id }, new CategoryResponse
         {
             Id = category.Id,

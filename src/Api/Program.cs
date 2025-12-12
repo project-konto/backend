@@ -5,15 +5,7 @@ using FluentValidation.AspNetCore;
 using KontoApi.Api.Middleware;
 using KontoApi.Api.Validators;
 using KontoApi.Application;
-using KontoApi.Application.Accounts;
-using KontoApi.Application.Features.Budgets.Queries.GetBudgetDetails;
-using KontoApi.Application.Features.Budgets.Queries.GetBudgetsList;
-using KontoApi.Application.Features.Users.Queries.GetUser;
-using KontoApi.Application.Handlers;
-using KontoApi.Application.Interfaces;
-using KontoApi.Application.Services;
 using KontoApi.Infrastructure;
-using KontoApi.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
@@ -78,7 +70,6 @@ try
 
     builder.Services.AddApplication();
     builder.Services.AddInfrastructure(builder.Configuration);
-
 
     var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
     builder.Services.AddCors(options =>

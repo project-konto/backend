@@ -27,7 +27,7 @@ public static class CategorySeeder
             if (!exists)
                 context.Categories.Add(new Category(name));
         }
-        
+
         await context.SaveChangesAsync(cancellationToken);
     }
 }

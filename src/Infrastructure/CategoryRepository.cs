@@ -8,7 +8,7 @@ public class CategoryRepository(KontoDbContext context) : ICategoryRepository
 {
     public async Task<IReadOnlyCollection<Category>> GetAllAsync(CancellationToken cancellationToken) =>
         await context.Categories.OrderBy(c => c.Name).ToListAsync(cancellationToken);
-    
+
     public async Task<Category?> GetByIdAsync(Guid id, CancellationToken cancellationToken) =>
         await context.Categories.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
@@ -24,7 +24,7 @@ public class CategoryRepository(KontoDbContext context) : ICategoryRepository
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
         if (entity == null)
             return;
-        
+
         context.Categories.Remove(entity);
         await context.SaveChangesAsync(cancellationToken);
     }
