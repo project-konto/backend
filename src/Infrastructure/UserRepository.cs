@@ -1,7 +1,6 @@
 ﻿using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
 
-
 namespace KontoApi.Infrastructure;
 
 public class UserRepository(KontoDbContext context) : IUserRepository
@@ -44,5 +43,10 @@ public class UserRepository(KontoDbContext context) : IUserRepository
         var dto = new User(user.Name, user.Email, user.HashedPassword);
 
         return dto;
+    }
+    
+    public Task DeleteAsync(Guid accountId, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
     }
 }

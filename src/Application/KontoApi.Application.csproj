@@ -7,14 +7,17 @@
     <ItemGroup>
         <Compile Remove="Class1.cs"/>
         <Compile Remove="Users\RegisterUser\**"/>
+        <Compile Remove="Accounts\**" />
     </ItemGroup>
 
     <ItemGroup>
         <EmbeddedResource Remove="Users\RegisterUser\**"/>
+        <EmbeddedResource Remove="Accounts\**" />
     </ItemGroup>
 
     <ItemGroup>
         <None Remove="Users\RegisterUser\**"/>
+        <None Remove="Accounts\**" />
     </ItemGroup>
 
     <PropertyGroup>
