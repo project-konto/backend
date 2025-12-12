@@ -1,52 +1,49 @@
 using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
-using KontoApi.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+
+namespace KontoApi.Infrastructure.Repositories;
 
 public class AccountRepository : IAccountRepository
 {
-    private readonly KontoDbContext context;
+    private readonly KontoDbContext dbContext;
 
-    public AccountRepository(KontoDbContext context)
-        => this.context = context;
+    public AccountRepository(KontoDbContext dbContext)
+        => this.dbContext = dbContext;
 
     public async Task AddAsync(Account account, CancellationToken cancellationToken = default)
     {
-        await context.Accounts.AddAsync(account, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
+        await dbContext.Accounts.AddAsync(account, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task UpdateAsync(Account account, CancellationToken cancellationToken = default)
     {
-        context.Accounts.Update(account);
-        await context.SaveChangesAsync(cancellationToken);
+        dbContext.Accounts.Update(account);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        var accountStub = await context.Accounts.FindAsync([id], cancellationToken);
+        var accountStub = await dbContext.Accounts.FindAsync([id], cancellationToken);
 
         if (accountStub != null)
         {
-            context.Accounts.Remove(accountStub);
-            await context.SaveChangesAsync(cancellationToken);
+            dbContext.Accounts.Remove(accountStub);
+            await dbContext.SaveChangesAsync(cancellationToken);
         }
     }
 
     public async Task<Account?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        return await context.Accounts
+        => await dbContext.Accounts
             .Include(a => a.User)
             .Include(a => a.Budgets)
             .FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
-    }
 
     public async Task<IEnumerable<Account>> GetByUserIdAsync(Guid userId, CancellationToken cancellationToken = default)
-    {
-        return await context.Accounts
+        => await dbContext.Accounts
             .Include(a => a.User)
             .Include(a => a.Budgets)
             .Where(a => a.User.Id == userId)
             .ToListAsync(cancellationToken);
-    }
 }

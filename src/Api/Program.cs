@@ -4,16 +4,19 @@ using FluentValidation;
 using FluentValidation.AspNetCore;
 using KontoApi.Api.Middleware;
 using KontoApi.Api.Validators;
+using KontoApi.Application;
 using KontoApi.Application.Accounts;
+using KontoApi.Application.Features.Budgets.Queries.GetBudgetDetails;
+using KontoApi.Application.Features.Budgets.Queries.GetBudgetsList;
 using KontoApi.Application.Features.Users.Queries.GetUser;
 using KontoApi.Application.Handlers;
 using KontoApi.Application.Interfaces;
 using KontoApi.Application.Services;
 using KontoApi.Infrastructure;
+using KontoApi.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateBootstrapLogger();
@@ -39,7 +42,7 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
     {
-        options.SwaggerDoc("v1", new OpenApiInfo
+        options.SwaggerDoc("v1", new()
         {
             Title = "KontoApi",
             Version = "v1",
@@ -58,7 +61,7 @@ try
         })
         .AddJwtBearer(options =>
         {
-            options.TokenValidationParameters = new TokenValidationParameters
+            options.TokenValidationParameters = new()
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(
@@ -73,25 +76,9 @@ try
             };
         });
 
-    builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
-    builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-    builder.Services.AddScoped<IStatementParser, StatementParser>();
-    builder.Services.AddScoped<IUserRepository, UserRepository>();
-    builder.Services.AddScoped<ITokenService, TokenService>();
-    builder.Services.AddScoped<IAuthService, AuthService>();
-    builder.Services.AddScoped<ImportTransactionsHandler>();
-    builder.Services.AddScoped<RegisterUserHandler>();
-    builder.Services.AddScoped<LoginUserHandler>();
-    builder.Services.AddScoped<AddTransactionHandler>();
-    builder.Services.AddScoped<GetUserHandler>();
-    builder.Services.AddScoped<GetBudgetHandler>();
-    builder.Services.AddScoped<GetTransactionsHandler>();
-    builder.Services.AddScoped<DeleteTransactionHandler>();
-    builder.Services.AddScoped<IAccountRepository, AccountRepository>();
-    builder.Services.AddScoped<CreateAccountHandler>();
-    builder.Services.AddScoped<GetAccountsHandler>();
-    builder.Services.AddScoped<DeleteAccountHandler>();
-    builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+    builder.Services.AddApplication();
+    builder.Services.AddInfrastructure(builder.Configuration);
+
 
     var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
     builder.Services.AddCors(options =>
@@ -100,7 +87,6 @@ try
         {
             if (allowedOrigins.Length == 0)
                 policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
-
             else
                 policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod();
         });
@@ -137,14 +123,12 @@ try
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<KontoDbContext>();
         db.Database.Migrate();
-        await CategorySeeder.SeedAsync(db);
     }
     catch (Exception e)
     {
         Log.Error(e, "An error occurred while migrating the database");
         throw;
     }
-
 
     app.Run();
 }
