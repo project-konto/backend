@@ -38,15 +38,13 @@ public class UserRepository(KontoDbContext context) : IUserRepository
         return await UserDto(user);
     }
 
-    private async static Task<User> UserDto(Models.UserEntity user)
+    public async Task DeleteAsync(Guid userId, CancellationToken cancellationToken = default)
     {
-        var dto = new User(user.Name, user.Email, user.HashedPassword);
+        var user = await context.User.FindAsync([userId], cancellationToken: cancellationToken);
+        if (user != null) context.User.Remove(user);
+        await context.SaveChangesAsync(cancellationToken);
+    }
 
-        return dto;
-    }
-    
-    public Task DeleteAsync(Guid accountId, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
+    private async static Task<User> UserDto(Models.UserEntity user)
+        => new(user.Name, user.Email, user.HashedPassword);
 }
