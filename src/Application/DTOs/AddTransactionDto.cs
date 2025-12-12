@@ -3,4 +3,5 @@
 public class AddTransactionDto
 {
     public Guid TransactionId { get; init; }
+    public Guid BudgetId { get; init; }
 }

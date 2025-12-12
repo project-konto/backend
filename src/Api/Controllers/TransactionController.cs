@@ -8,6 +8,7 @@ using GetTransactionsHandler = KontoApi.Application.Handlers.GetTransactionsHand
 
 namespace KontoApi.Api.Controllers;
 
+[Route("api/budgets/{budgetId:guid}/transactions")]
 public class TransactionController : BaseController
 {
     private readonly AddTransactionHandler addHandler;
@@ -23,14 +24,14 @@ public class TransactionController : BaseController
     }
 
     [HttpPost]
-    public async Task<ActionResult<TransactionResponse>> Create([FromBody] CreateTransactionRequest request)
+    public async Task<ActionResult<TransactionResponse>> Create([FromBody] CreateTransactionRequest request, Guid budgetId)
     {
         if (!Enum.TryParse<TransactionType>(request.Type, true, out var transactionType))
             return BadRequest($"Unknown transaction type: {request.Type}");
 
         var command = new AddTransactionCommand
         {
-            UserId = Guid.Empty,
+            BudgetId = budgetId,
             Type = transactionType,
             Amount = (decimal)request.Amount,
             Currency = request.Currency,
@@ -55,7 +56,7 @@ public class TransactionController : BaseController
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TransactionResponse>>> Get([FromQuery] Guid accountId,
+    public async Task<ActionResult<IEnumerable<TransactionResponse>>> Get([FromQuery] Guid budgetId,
         [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, [FromQuery] string? type,
         [FromQuery] string? category, [FromQuery] double? minAmount, [FromQuery] double? maxAmount)
     {
@@ -69,7 +70,7 @@ public class TransactionController : BaseController
 
         var query = new GetTransactionsQuery
         {
-            AccountId = accountId,
+            BudgetId = budgetId,
             DateRange = DateRange.Create(startDate, endDate),
             Type = typeEnum,
             Category = category,
@@ -77,28 +78,18 @@ public class TransactionController : BaseController
             MaxAmount = maxAmount.HasValue ? (decimal)maxAmount.Value : null
         };
 
-        var dtos = await getHandler.Handle(query);
-        var response = dtos.Select(t => new TransactionResponse
-        {
-            Id = t.Id,
-            Amount = (double)t.Amount,
-            Currency = t.Currency,
-            Category = t.Category,
-            Date = t.Date,
-            Description = t.Description,
-            Type = t.Type.ToString()
-        });
-
+        var response = await getHandler.Handle(query);
         return Ok(response);
     }
 
-    [HttpDelete("{id:guid}")]
-    public async Task<ActionResult> Delete(Guid id)
+    [HttpDelete("{transactionId:guid}")]
+    public async Task<ActionResult> Delete(Guid budgetId ,Guid transactionId)
     {
         var command = new DeleteTransactionCommand
         {
-            TransactionId = id,
-            UserId = Guid.Empty
+            TransactionId = transactionId,
+            BudgetId = budgetId
+            
         };
 
         var result = await deleteHandler.Handle(command);

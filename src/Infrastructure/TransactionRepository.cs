@@ -3,7 +3,6 @@ using KontoApi.Domain;
 using KontoApi.Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-using NotImplementedException = System.NotImplementedException;
 
 namespace KontoApi.Infrastructure;
 
@@ -12,7 +11,7 @@ public class TransactionRepository(KontoDbContext context) : ITransactionReposit
     public async Task AddAsync(Transaction transaction, CancellationToken cancellationToken = default)
     {
         var transactionEntity =
-            new Models.TransactionEntity
+            new TransactionEntity
             {
                 Id = transaction.Id,
                 TransactionTypeName = transaction.TransactionCategory.Name,
@@ -30,7 +29,7 @@ public class TransactionRepository(KontoDbContext context) : ITransactionReposit
     {
         foreach (var transaction in transactions)
         {
-            var transactionEntity = new Models.TransactionEntity
+            var transactionEntity = new TransactionEntity
             {
                 Id = transaction.Id,
                 TransactionTypeName = transaction.TransactionCategory.Name,
@@ -66,20 +65,7 @@ public class TransactionRepository(KontoDbContext context) : ITransactionReposit
 
         return exist;
     }
-
-    public async Task<bool> ExistsByExternalIdAsync(Guid UserId, string ExternalId, CancellationToken cancellationToken = default)
-    {
-        if (!Guid.TryParse(ExternalId, out var externalIdGuid)) return false;
-
-        return await context.Transaction
-            .Include(t => t.BudgetEntity)
-            .ThenInclude(b => b!.AccountEntity)
-            .AnyAsync(t => t.BudgetEntity != null
-                           && t.BudgetEntity.AccountEntity != null
-                           && t.BudgetEntity.AccountEntity.UserId == UserId
-                           && t.BudgetId == externalIdGuid, cancellationToken);
-    }
-
+    
     public async Task DeleteAsync(Guid transactionId, CancellationToken cancellationToken = default)
     {
         await context.Transaction.Where(transaction => transaction.Id == transactionId).ExecuteDeleteAsync(cancellationToken: cancellationToken);

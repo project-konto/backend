@@ -4,7 +4,7 @@ namespace KontoApi.Application.Users.Transactions;
 
 public class AddTransactionCommand
 {
-    public Guid UserId { get; init; }
+    public Guid BudgetId { get; init; }
     public TransactionType Type { get; init; }
     public decimal Amount { get; init; }
     public string Currency { get; init; } = "";

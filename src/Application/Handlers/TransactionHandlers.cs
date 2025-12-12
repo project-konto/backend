@@ -8,12 +8,14 @@ namespace KontoApi.Application.Handlers;
 
 public class AddTransactionHandler
 {
-    private readonly ITransactionRepository transactionRepository;
+    private readonly IBudgetRepository budgetRepository;
 
-    public AddTransactionHandler(ITransactionRepository repository) => transactionRepository = repository;
+    public AddTransactionHandler(IBudgetRepository repository) => budgetRepository = repository;
 
-    public async Task<AddTransactionDto> Handle(AddTransactionCommand command)
+    public async Task<AddTransactionDto> Handle(AddTransactionCommand command, CancellationToken cancellationToken = default)
     {
+        if (command.BudgetId == Guid.Empty)
+            throw new BadRequestException("Budget id cannot be empty");
         if (command.Amount <= 0)
             throw new ValidationException("Amount must be greater than 0");
         if (string.IsNullOrWhiteSpace(command.Currency))
@@ -26,28 +28,30 @@ public class AddTransactionHandler
         var transaction =
             new Transaction(money, command.Type, category, command.Date, command.Description ?? string.Empty);
 
-        await transactionRepository.AddAsync(transaction);
-        return new()
+        await budgetRepository.AddAsync(command.BudgetId, transaction, cancellationToken);
+        return new AddTransactionDto
         {
-            TransactionId = transaction.Id
+            TransactionId = transaction.Id,
+            BudgetId = command.BudgetId,
         };
     }
 }
 
 public class DeleteTransactionHandler
 {
-    private readonly ITransactionRepository transactionRepository;
+    private readonly IBudgetRepository budgetRepository;
 
-    public DeleteTransactionHandler(ITransactionRepository repository) => transactionRepository = repository;
+    public DeleteTransactionHandler(IBudgetRepository repository) => budgetRepository = repository;
 
-    public async Task<DeleteTransactionDto> Handle(DeleteTransactionCommand command)
+    public async Task<DeleteTransactionDto> Handle(DeleteTransactionCommand command, CancellationToken cancellationToken = default)
     {
-        var exists = await transactionRepository.ExistsAsync(command.TransactionId);
-        if (!exists)
-            throw new NotFoundException($"Transaction with id {command.TransactionId} does not exist");
-
-        await transactionRepository.DeleteAsync(command.TransactionId);
-        return new()
+        if (command.BudgetId == Guid.Empty)
+            throw new BadRequestException("Budget id cannot be empty");
+        if (command.TransactionId == Guid.Empty)
+            throw new BadRequestException("Transaction id cannot be empty");
+        
+        await budgetRepository.DeleteAsync(command.BudgetId, command.TransactionId, cancellationToken); 
+        return new DeleteTransactionDto
         {
             IsDeleted = true
         };
@@ -57,16 +61,19 @@ public class DeleteTransactionHandler
 public class ImportTransactionsHandler
 {
     private readonly IStatementParser statementParser;
-    private readonly ITransactionRepository transactionRepository;
+    private readonly IBudgetRepository budgetRepository;
 
-    public ImportTransactionsHandler(IStatementParser parser, ITransactionRepository repository)
+    public ImportTransactionsHandler(IStatementParser parser, IBudgetRepository repository)
     {
         statementParser = parser;
-        transactionRepository = repository;
+        budgetRepository = repository;
     }
 
-    public async Task<ImportTransactionsDto> Handle(ImportTransactionCommand command)
+    public async Task<ImportTransactionsDto> Handle(ImportTransactionCommand command, CancellationToken cancellationToken)
     {
+        if (command.BudgetId == Guid.Empty)
+            throw new BadRequestException("Budget id cannot be empty");
+        
         var stream = new MemoryStream(command.FileBytes);
         var parsed = statementParser.Parse(stream).ToList();
         var skipped = 0;
@@ -79,13 +86,6 @@ public class ImportTransactionsHandler
             lineNumber++;
             try
             {
-                if (operation.ExternalId != null &&
-                    await transactionRepository.ExistsByExternalIdAsync(command.UserId, operation.ExternalId))
-                {
-                    skipped++;
-                    continue;
-                }
-
                 var category = operation.CategoryName ?? new Category("Uncategorized"); // temporary 
                 var money = new Money(Math.Abs(operation.Amount), operation.Currency);
                 var type = operation.Amount > 0 ? TransactionType.Income : TransactionType.Expense;
@@ -97,7 +97,7 @@ public class ImportTransactionsHandler
 
             catch (Exception ex)
             {
-                errors.Add(new()
+                errors.Add(new ImportErrorDto
                 {
                     LineNumber = lineNumber,
                     Reason = ex.Message
@@ -105,8 +105,8 @@ public class ImportTransactionsHandler
             }
         }
 
-        await transactionRepository.AddRangeAsync(transactions);
-        return new()
+        await budgetRepository.AddRangeAsync(command.BudgetId, transactions, cancellationToken);
+        return new ImportTransactionsDto
         {
             Total = parsed.Count,
             Imported = transactions.Count,

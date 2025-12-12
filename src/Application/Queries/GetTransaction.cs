@@ -5,7 +5,7 @@ namespace KontoApi.Application.Queries;
 
 public class GetTransactionsQuery
 {
-    public Guid AccountId { get; init; }
+    public Guid BudgetId { get; init; }
     public DateRange? DateRange { get; init; }
     public TransactionType? Type { get; init; }
     public string? Category { get; init; }
