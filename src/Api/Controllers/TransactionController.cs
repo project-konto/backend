@@ -83,13 +83,13 @@ public class TransactionController : BaseController
     }
 
     [HttpDelete("{transactionId:guid}")]
-    public async Task<ActionResult> Delete(Guid budgetId ,Guid transactionId)
+    public async Task<ActionResult> Delete(Guid budgetId, Guid transactionId)
     {
         var command = new DeleteTransactionCommand
         {
             TransactionId = transactionId,
             BudgetId = budgetId
-            
+
         };
 
         var result = await deleteHandler.Handle(command);

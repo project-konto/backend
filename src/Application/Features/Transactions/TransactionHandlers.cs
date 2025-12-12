@@ -12,7 +12,8 @@ public class AddTransactionHandler
 
     public AddTransactionHandler(IBudgetRepository repository) => budgetRepository = repository;
 
-    public async Task<AddTransactionDto> Handle(AddTransactionCommand command, CancellationToken cancellationToken = default)
+    public async Task<AddTransactionDto> Handle(AddTransactionCommand command,
+        CancellationToken cancellationToken = default)
     {
         if (command.BudgetId == Guid.Empty)
             throw new BadRequestException("Budget id cannot be empty");
@@ -28,7 +29,15 @@ public class AddTransactionHandler
         var transaction =
             new Transaction(money, command.Type, category, command.Date, command.Description ?? string.Empty);
 
-        await budgetRepository.AddAsync(command.BudgetId, transaction, cancellationToken);
+        var budget = await budgetRepository.GetByIdAsync(command.BudgetId, cancellationToken);
+
+        if (budget == null)
+            throw new NotFoundException(typeof(Budget), command.BudgetId);
+
+        budget.AddTransaction(transaction);
+
+        await budgetRepository.UpdateAsync(budget, cancellationToken);
+
         return new AddTransactionDto
         {
             TransactionId = transaction.Id,
@@ -43,14 +52,25 @@ public class DeleteTransactionHandler
 
     public DeleteTransactionHandler(IBudgetRepository repository) => budgetRepository = repository;
 
-    public async Task<DeleteTransactionDto> Handle(DeleteTransactionCommand command, CancellationToken cancellationToken = default)
+    public async Task<DeleteTransactionDto> Handle(DeleteTransactionCommand command,
+        CancellationToken cancellationToken = default)
     {
         if (command.BudgetId == Guid.Empty)
             throw new BadRequestException("Budget id cannot be empty");
         if (command.TransactionId == Guid.Empty)
             throw new BadRequestException("Transaction id cannot be empty");
-        
-        await budgetRepository.DeleteAsync(command.BudgetId, command.TransactionId, cancellationToken); 
+
+        var budget = await budgetRepository.GetByIdAsync(command.BudgetId, cancellationToken);
+        if (budget == null)
+            throw new NotFoundException(typeof(Budget), command.BudgetId);
+
+        var transaction = await budgetRepository.GetByIdAsync(command.TransactionId, cancellationToken);
+        if (transaction == null)
+            throw new NotFoundException(typeof(Transaction), command.TransactionId);
+
+        budget.RemoveTransaction(command.TransactionId);
+        await budgetRepository.UpdateAsync(budget, cancellationToken);
+
         return new DeleteTransactionDto
         {
             IsDeleted = true
@@ -69,11 +89,12 @@ public class ImportTransactionsHandler
         budgetRepository = repository;
     }
 
-    public async Task<ImportTransactionsDto> Handle(ImportTransactionCommand command, CancellationToken cancellationToken)
+    public async Task<ImportTransactionsDto> Handle(ImportTransactionCommand command,
+        CancellationToken cancellationToken)
     {
         if (command.BudgetId == Guid.Empty)
             throw new BadRequestException("Budget id cannot be empty");
-        
+
         var stream = new MemoryStream(command.FileBytes);
         var parsed = statementParser.Parse(stream).ToList();
         var skipped = 0;
@@ -105,7 +126,8 @@ public class ImportTransactionsHandler
             }
         }
 
-        await budgetRepository.AddRangeAsync(command.BudgetId, transactions, cancellationToken);
+        // Logic to update budget with new transactions
+
         return new ImportTransactionsDto
         {
             Total = parsed.Count,

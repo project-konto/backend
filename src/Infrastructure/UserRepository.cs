@@ -1,50 +1,47 @@
 ﻿using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
+using KontoApi.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 
-namespace KontoApi.Infrastructure;
-
-public class UserRepository(KontoDbContext context) : IUserRepository
+public class UserRepository : IUserRepository
 {
-    public async Task AddAsync(User user, CancellationToken cancellationToken = default)
+    private readonly KontoDbContext context;
+
+    public UserRepository(KontoDbContext context)
+        => this.context = context;
+
+    public async Task AddAsync(User user, CancellationToken ct)
     {
-        var userEntity = new Models.UserEntity
+        await context.Users.AddAsync(user, ct);
+        await context.SaveChangesAsync(ct);
+    }
+
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken ct)
+    {
+        return await context.Users
+            .FirstOrDefaultAsync(u => u.Email == email, ct);
+    }
+
+    public async Task<User?> GetByIdAsync(Guid id, CancellationToken ct)
+    {
+        return await context.Users
+            .FirstOrDefaultAsync(u => u.Id == id, ct);
+    }
+
+    public async Task UpdateAsync(User user, CancellationToken ct)
+    {
+        context.Users.Update(user);
+        await context.SaveChangesAsync(ct);
+    }
+
+    public async Task DeleteAsync(Guid id, CancellationToken ct)
+    {
+        var userStub = await context.Users.FindAsync([id], ct);
+
+        if (userStub != null)
         {
-            Id = user.Id,
-            Name = user.Name,
-            Email = user.Email,
-            HashedPassword = user.HashedPassword
-        };
-
-        await context.User.AddAsync(userEntity, cancellationToken);
+            context.Users.Remove(userStub);
+            await context.SaveChangesAsync(ct);
+        }
     }
-
-    public async Task<User?> FindByEmailAsync(string email, CancellationToken cancellationToken = default)
-    {
-        var user = await context.User.FindAsync(email);
-
-        if (user == null)
-            return null;
-
-        return await UserDto(user);
-    }
-
-    public async Task<User?> GetByIdAsync(Guid userId, CancellationToken cancellationToken = default)
-    {
-        var user = await context.User.FindAsync(userId, cancellationToken);
-
-        if (user == null)
-            return null;
-
-        return await UserDto(user);
-    }
-
-    public async Task DeleteAsync(Guid userId, CancellationToken cancellationToken = default)
-    {
-        var user = await context.User.FindAsync([userId], cancellationToken: cancellationToken);
-        if (user != null) context.User.Remove(user);
-        await context.SaveChangesAsync(cancellationToken);
-    }
-
-    private async static Task<User> UserDto(Models.UserEntity user)
-        => new(user.Name, user.Email, user.HashedPassword);
 }

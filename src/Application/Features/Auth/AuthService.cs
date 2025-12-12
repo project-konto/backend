@@ -17,8 +17,13 @@ public class AuthService : IAuthService
         this.tokenService = tokenService;
     }
 
-    public Task<User?> FindUserByEmailAsync(string email) => usersRepository.FindByEmailAsync(email);
-    public bool VerifyPassword(string password, string hash) => passwordHasher.Verify(password, hash);
-    public string HashPassword(string password) => passwordHasher.Hash(password);
-    public AuthUserDto CreateAuthResult(User user) => new(user, tokenService.GenerateAccessToken(user));
+    public Task<User?> FindUserByEmailAsync(string email)
+        => usersRepository.GetByEmailAsync(email, CancellationToken.None);
+
+    public bool VerifyPassword(string password, string hash)
+        => passwordHasher.Verify(password, hash);
+    public string HashPassword(string password)
+        => passwordHasher.Hash(password);
+    public AuthUserDto CreateAuthResult(User user)
+        => new(user, tokenService.GenerateAccessToken(user));
 }

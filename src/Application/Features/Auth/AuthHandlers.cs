@@ -23,7 +23,7 @@ public class RegisterUserHandler
             throw new ConflictException($"User with email {command.Email} already exists");
 
         var user = new User(command.Name, command.Email, authService.HashPassword(command.Password));
-        await usersRepository.AddAsync(user);
+        await usersRepository.AddAsync(user, CancellationToken.None);
 
         return authService.CreateAuthResult(user);
     }

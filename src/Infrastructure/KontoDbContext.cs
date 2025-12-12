@@ -1,31 +1,26 @@
 ﻿using System;
+using System.Reflection;
+using KontoApi.Application.Interfaces;
+using KontoApi.Domain;
 using Microsoft.EntityFrameworkCore;
 using KontoApi.Infrastructure.Configurations;
 using KontoApi.Infrastructure.Models;
 
 namespace KontoApi.Infrastructure;
 
-public class KontoDbContext : DbContext
+public class KontoDbContext : DbContext, IApplicationDbContext
 {
     public KontoDbContext(DbContextOptions<KontoDbContext> options) : base(options) { }
-    public KontoDbContext() { }
 
-    public DbSet<AccountEntity> Account { get; set; }
-    public DbSet<BudgetEntity> Budget { get; set; }
-    public DbSet<CategoryEntity> Category { get; set; }
-    public DbSet<TransactionEntity> Transaction { get; set; }
-    public DbSet<UserEntity> User { get; set; }
-    public DbSet<TransactionTypesEntity> TransactionTypes { get; set; }
+    public DbSet<Account> Accounts { get; set; }
+    public DbSet<Budget> Budgets { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
+    public DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfiguration(new AccountConfiguration());
-        modelBuilder.ApplyConfiguration(new BudgetConfiguration());
-        modelBuilder.ApplyConfiguration(new CategoryConfiguration());
-        modelBuilder.ApplyConfiguration(new TransactionConfiguration());
-        modelBuilder.ApplyConfiguration(new TransactionTypesConfiguration());
-        modelBuilder.ApplyConfiguration(new UserConfiguration());
-
+        modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         base.OnModelCreating(modelBuilder);
     }
 }

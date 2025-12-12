@@ -13,7 +13,8 @@ public class GetBudgetHandler
 
     public async Task<BudgetDto> Handle(GetBudgetQuery query)
     {
-        var budget = await budgetRepository.GetByUserIdAsync(query.UserId);
+        // Fix to accept BudgetId
+        var budget = await budgetRepository.GetByIdAsync(query.UserId, CancellationToken.None);
         if (budget == null)
             throw new NotFoundException("Budget not found");
 

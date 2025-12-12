@@ -20,6 +20,30 @@
         <None Remove="Accounts\**" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Auth\" />
+      <Folder Include="Common\" />
+      <Folder Include="Features\Accounts\Commands\" />
+      <Folder Include="Features\Accounts\Queries\" />
+      <Folder Include="Features\Auth\Commands\" />
+      <Folder Include="Features\Budgets\Commands\" />
+      <Folder Include="Features\Budgets\Queries\" />
+      <Folder Include="Features\Categories\Commands\" />
+      <Folder Include="Features\Categories\Queries\" />
+      <Folder Include="Features\Transactions\Commands\" />
+      <Folder Include="Features\Transactions\Queries\" />
+      <Folder Include="Features\Users\Commands\DeleteUser\" />
+      <Folder Include="Features\Users\Commands\UpdateEmail\" />
+      <Folder Include="Features\Users\Commands\UpdateProfile\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.1" />
+      <PackageReference Include="MediatR" Version="14.0.0" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.11" />
+      <PackageReference Include="Microsoft.TestPlatform.TestHost" Version="17.14.1" />
+    </ItemGroup>
+
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>

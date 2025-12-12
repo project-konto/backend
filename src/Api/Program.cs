@@ -5,6 +5,7 @@ using FluentValidation.AspNetCore;
 using KontoApi.Api.Middleware;
 using KontoApi.Api.Validators;
 using KontoApi.Application.Accounts;
+using KontoApi.Application.Features.Users.Queries.GetUser;
 using KontoApi.Application.Handlers;
 using KontoApi.Application.Interfaces;
 using KontoApi.Application.Services;
@@ -74,7 +75,6 @@ try
     builder.Services.AddScoped<IBudgetRepository, BudgetRepository>();
     builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
     builder.Services.AddScoped<IStatementParser, StatementParser>();
-    builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
     builder.Services.AddScoped<IUserRepository, UserRepository>();
     builder.Services.AddScoped<ITokenService, TokenService>();
     builder.Services.AddScoped<IAuthService, AuthService>();
