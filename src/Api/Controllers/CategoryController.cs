@@ -1,4 +1,5 @@
 ﻿using KontoApi.Api.Contracts;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
 using Microsoft.AspNetCore.Mvc;

@@ -1,4 +1,5 @@
-﻿using KontoApi.Application.Interfaces;
+﻿using KontoApi.Application.Common.Interfaces;
+using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,12 @@ public class CategoryRepository(KontoDbContext context) : ICategoryRepository
     public async Task AddAsync(Category category, CancellationToken cancellationToken)
     {
         await context.Categories.AddAsync(category, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task UpdateAsync(Category category, CancellationToken cancellationToken)
+    {
+        context.Categories.Update(category);
         await context.SaveChangesAsync(cancellationToken);
     }
 
