@@ -13,6 +13,7 @@ using KontoApi.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateBootstrapLogger();
@@ -38,7 +39,7 @@ try
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
     {
-        options.SwaggerDoc("v1", new()
+        options.SwaggerDoc("v1", new OpenApiInfo
         {
             Title = "KontoApi",
             Version = "v1",
@@ -57,7 +58,7 @@ try
         })
         .AddJwtBearer(options =>
         {
-            options.TokenValidationParameters = new()
+            options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(
@@ -90,7 +91,7 @@ try
     builder.Services.AddScoped<CreateAccountHandler>();
     builder.Services.AddScoped<GetAccountsHandler>();
     builder.Services.AddScoped<DeleteAccountHandler>();
-
+    builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 
     var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
     builder.Services.AddCors(options =>
@@ -136,6 +137,7 @@ try
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<KontoDbContext>();
         db.Database.Migrate();
+        await CategorySeeder.SeedAsync(db);
     }
     catch (Exception e)
     {

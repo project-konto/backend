@@ -5,7 +5,6 @@ public class Money : IEquatable<Money>, IComparable<Money>
     public decimal Value { get; }
     public string Currency { get; }
 
-
     public Money(decimal value, string currency)
     {
         if (string.IsNullOrWhiteSpace(currency))
