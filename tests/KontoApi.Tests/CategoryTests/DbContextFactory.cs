@@ -10,15 +10,15 @@ public class DbContextFactory
     {
         var connection = new SqliteConnection("DataSource=:memory:");
         connection.Open();
-        
+
         var options = new DbContextOptionsBuilder<KontoDbContext>()
             .UseSqlite(connection)
             .EnableSensitiveDataLogging()
             .Options;
-        
+
         var context = new KontoDbContext(options);
         context.Database.EnsureCreated();
-        
+
         return (context, connection);
     }
 }

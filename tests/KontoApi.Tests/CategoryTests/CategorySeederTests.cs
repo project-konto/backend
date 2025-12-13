@@ -23,7 +23,7 @@ public class CategorySeederTests
         await using var _ = connection;
         await CategorySeeder.SeedAsync(context);
         await CategorySeeder.SeedAsync(context);
-        
+
         var count = await context.Categories.CountAsync();
         Assert.Equal(10, count);
     }
@@ -36,11 +36,11 @@ public class CategorySeederTests
 
         context.Categories.Add(new Domain.Category("rent"));
         context.Categories.Add(new Domain.Category("taxes"));
-        
+
         await context.SaveChangesAsync();
         await CategorySeeder.SeedAsync(context);
-        
+
         var count = await context.Categories.CountAsync();
-        Assert.Equal(10, count); 
+        Assert.Equal(10, count);
     }
 }
