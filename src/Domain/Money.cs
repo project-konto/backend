@@ -2,8 +2,10 @@ namespace KontoApi.Domain;
 
 public class Money : IEquatable<Money>, IComparable<Money>
 {
-    public decimal Value { get; }
-    public string Currency { get; }
+    public decimal Value { get; init; }
+    public string Currency { get; init; }
+
+    private Money() { /* ORM */ }
 
     public Money(decimal value, string currency)
     {

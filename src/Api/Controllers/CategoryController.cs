@@ -40,6 +40,7 @@ public class CategoryController(ICategoryRepository categoryRepository) : BaseCo
         });
     }
 
+    [HttpDelete]
     public async Task<ActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
         await categoryRepository.DeleteAsync(id, cancellationToken);

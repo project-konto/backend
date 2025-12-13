@@ -1,5 +1,6 @@
 using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
+using KontoApi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace KontoApi.Infrastructure.Repositories;

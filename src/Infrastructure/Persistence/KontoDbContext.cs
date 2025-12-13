@@ -1,12 +1,9 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
 using Microsoft.EntityFrameworkCore;
-using KontoApi.Infrastructure.Configurations;
-using KontoApi.Infrastructure.Models;
 
-namespace KontoApi.Infrastructure;
+namespace KontoApi.Infrastructure.Persistence;
 
 public class KontoDbContext : DbContext, IApplicationDbContext
 {

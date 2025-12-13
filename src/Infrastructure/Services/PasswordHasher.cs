@@ -1,7 +1,6 @@
 using KontoApi.Application.Interfaces;
-using BCrypt.Net;
 
-namespace KontoApi.Infrastructure;
+namespace KontoApi.Infrastructure.Services;
 
 public class PasswordHasher : IPasswordHasher
 {

@@ -1,52 +1,32 @@
-﻿using KontoApi.Api.Contracts;
-using KontoApi.Application.DTOs;
-using KontoApi.Application.Handlers;
-using KontoApi.Application.Users;
+﻿using KontoApi.Application.Features.Auth.Commands.Login;
+using KontoApi.Application.Features.Auth.Commands.Register;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 
 namespace KontoApi.Api.Controllers;
 
-public class AuthController : BaseController
+[ApiController]
+[Route("api/[controller]")]
+public class AuthController : ControllerBase
 {
-    private readonly RegisterUserHandler registerHandler;
-    private readonly LoginUserHandler loginHandler;
+    private readonly IMediator mediator;
 
-    public AuthController(RegisterUserHandler registerHandler, LoginUserHandler loginHandler)
-    {
-        this.registerHandler = registerHandler;
-        this.loginHandler = loginHandler;
-    }
+    public AuthController(IMediator mediator)
+        => this.mediator = mediator;
 
+    // POST api/auth/register
     [HttpPost("register")]
-    [AllowAnonymous]
-    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest registerRequest)
+    public async Task<IActionResult> Register(RegisterCommand command)
     {
-        var command = new RegisterUserCommand(registerRequest.Name, registerRequest.Email, registerRequest.Password);
-
-        var dto = await registerHandler.Handle(command);
-        var response = ToAuthResponse(dto);
-
-        return Ok(response);
+        var userId = await mediator.Send(command);
+        return Ok(new { UserId = userId });
     }
 
+    // POST api/auth/login
     [HttpPost("login")]
-    [AllowAnonymous]
-    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest loginRequest)
+    public async Task<IActionResult> Login(LoginCommand command)
     {
-        var command = new LoginUserCommand(loginRequest.Email, loginRequest.Password);
-
-        var dto = await loginHandler.Handle(command);
-        var response = ToAuthResponse(dto);
-
+        var response = await mediator.Send(command);
         return Ok(response);
     }
-
-    private static AuthResponse ToAuthResponse(AuthUserDto dto) => new()
-    {
-        UserId = dto.UserId,
-        Name = dto.Name,
-        Email = dto.Email,
-        AccessToken = dto.Token
-    };
 }

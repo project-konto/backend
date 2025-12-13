@@ -13,25 +13,6 @@ public class UsersController : ControllerBase
 {
     private readonly IMediator mediator;
 
-    public UsersController(IMediator mediator)
-        => this.mediator = mediator;
-
-    // POST api/users/register
-    [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterCommand command)
-    {
-        var userId = await mediator.Send(command);
-        return CreatedAtAction(nameof(GetUser), new { id = userId }, userId);
-    }
-
-    // POST api/users/login
-    [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginCommand command)
-    {
-        var response = await mediator.Send(command);
-        return Ok(response);
-    }
-
     // GET api/users/{id}
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetUser(Guid id)

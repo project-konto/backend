@@ -21,8 +21,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Auth\" />
-      <Folder Include="Common\" />
       <Folder Include="Features\Auth\Commands\" />
       <Folder Include="Features\Budgets\Commands\" />
       <Folder Include="Features\Budgets\Queries\" />

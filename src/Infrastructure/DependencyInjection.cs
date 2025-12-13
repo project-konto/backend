@@ -1,5 +1,8 @@
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Application.Interfaces;
+using KontoApi.Infrastructure.Persistence;
 using KontoApi.Infrastructure.Repositories;
+using KontoApi.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +22,7 @@ public static class DependencyInjection
 
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<IBudgetRepository, BudgetRepository>();
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IUserRepository, UserRepository>();
 
         services.AddScoped<IPasswordHasher, PasswordHasher>();

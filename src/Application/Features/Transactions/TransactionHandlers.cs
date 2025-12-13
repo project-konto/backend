@@ -1,4 +1,5 @@
-﻿using KontoApi.Application.Exceptions;
+﻿using FluentValidation;
+using KontoApi.Application.Exceptions;
 using KontoApi.Application.Users.Transactions;
 using KontoApi.Application.DTOs;
 using KontoApi.Application.Interfaces;
@@ -38,7 +39,7 @@ public class AddTransactionHandler
 
         await budgetRepository.UpdateAsync(budget, cancellationToken);
 
-        return new AddTransactionDto
+        return new()
         {
             TransactionId = transaction.Id,
             BudgetId = command.BudgetId,
@@ -71,7 +72,7 @@ public class DeleteTransactionHandler
         budget.RemoveTransaction(command.TransactionId);
         await budgetRepository.UpdateAsync(budget, cancellationToken);
 
-        return new DeleteTransactionDto
+        return new()
         {
             IsDeleted = true
         };
@@ -118,7 +119,7 @@ public class ImportTransactionsHandler
 
             catch (Exception ex)
             {
-                errors.Add(new ImportErrorDto
+                errors.Add(new()
                 {
                     LineNumber = lineNumber,
                     Reason = ex.Message
@@ -128,7 +129,7 @@ public class ImportTransactionsHandler
 
         // Logic to update budget with new transactions
 
-        return new ImportTransactionsDto
+        return new()
         {
             Total = parsed.Count,
             Imported = transactions.Count,

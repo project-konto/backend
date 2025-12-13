@@ -6,6 +6,7 @@ using KontoApi.Api.Middleware;
 using KontoApi.Api.Validators;
 using KontoApi.Application;
 using KontoApi.Infrastructure;
+using KontoApi.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;

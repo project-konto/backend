@@ -1,7 +1,7 @@
 using KontoApi.Application.DTOs;
 using KontoApi.Application.Interfaces;
 
-namespace KontoApi.Infrastructure;
+namespace KontoApi.Infrastructure.Services;
 
 public class StatementParser : IStatementParser
 {
