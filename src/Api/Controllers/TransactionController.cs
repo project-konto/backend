@@ -1,101 +1,74 @@
-using KontoApi.Application.DTOs;
-using KontoApi.Application.Handlers;
-using KontoApi.Application.Queries;
-using KontoApi.Application.Users.Transactions;
-using KontoApi.Domain;
+using KontoApi.Api.Contracts;
+using KontoApi.Application.Features.Transactions.Commands.AddTransaction;
+using KontoApi.Application.Features.Transactions.Commands.DeleteTransaction;
+using KontoApi.Application.Features.Transactions.Commands.ImportTransactions;
+using KontoApi.Application.Features.Transactions.Queries.GetTransactionById;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using GetTransactionsHandler = KontoApi.Application.Handlers.GetTransactionsHandler;
 
 namespace KontoApi.Api.Controllers;
 
-[Route("api/budgets/{budgetId:guid}/transactions")]
-public class TransactionController : BaseController
+[ApiController]
+[Route("api/[controller]")]
+[Produces("application/json")]
+public class TransactionsController : ControllerBase
 {
-    private readonly AddTransactionHandler addHandler;
-    private readonly GetTransactionsHandler getHandler;
-    private readonly DeleteTransactionHandler deleteHandler;
+	private readonly IMediator mediator;
 
-    public TransactionController(AddTransactionHandler addHandler, GetTransactionsHandler getHandler,
-        DeleteTransactionHandler deleteHandler)
-    {
-        this.addHandler = addHandler;
-        this.getHandler = getHandler;
-        this.deleteHandler = deleteHandler;
-    }
+	public TransactionsController(IMediator mediator)
+		=> this.mediator = mediator;
 
-    [HttpPost]
-    public async Task<ActionResult<TransactionResponse>> Create([FromBody] CreateTransactionRequest request, Guid budgetId)
-    {
-        if (!Enum.TryParse<TransactionType>(request.Type, true, out var transactionType))
-            return BadRequest($"Unknown transaction type: {request.Type}");
+	// POST api/transactions
+	[HttpPost]
+	[ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> AddTransaction(AddTransactionCommand command)
+	{
+		var transactionId = await mediator.Send(command);
+		return Ok(new { TransactionId = transactionId });
+	}
 
-        var command = new AddTransactionCommand
-        {
-            BudgetId = budgetId,
-            Type = transactionType,
-            Amount = (decimal)request.Amount,
-            Currency = request.Currency,
-            Category = request.Category,
-            Date = request.Date,
-            Description = request.Description
-        };
+	// GET api/transactions/{id}
+	[HttpGet("{id:guid}")]
+	[ProducesResponseType(typeof(TransactionDetailDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> GetTransaction(Guid id)
+	{
+		var result = await mediator.Send(new GetTransactionByIdQuery(id));
+		return Ok(result);
+	}
 
-        var result = await addHandler.Handle(command);
-        var response = new TransactionResponse
-        {
-            Id = result.TransactionId,
-            Amount = request.Amount,
-            Currency = request.Currency,
-            Category = request.Category,
-            Date = request.Date,
-            Description = request.Description,
-            Type = request.Type
-        };
+	// DELETE api/transactions/{id}?budgetId={budgetId}
+	[HttpDelete("{id:guid}")]
+	[ProducesResponseType(StatusCodes.Status204NoContent)]
+	[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+	public async Task<IActionResult> DeleteTransaction(Guid id, [FromQuery] Guid budgetId)
+	{
+		if (budgetId == Guid.Empty)
+			return BadRequest(new { error = "budgetId query parameter is required" });
 
-        return Ok(response);
-    }
+		await mediator.Send(new DeleteTransactionCommand(BudgetId: budgetId, TransactionId: id));
+		return NoContent();
+	}
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<TransactionResponse>>> Get([FromQuery] Guid budgetId,
-        [FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, [FromQuery] string? type,
-        [FromQuery] string? category, [FromQuery] double? minAmount, [FromQuery] double? maxAmount)
-    {
-        TransactionType? typeEnum = null;
-        if (!string.IsNullOrWhiteSpace(type))
-        {
-            if (!Enum.TryParse<TransactionType>(type, true, out var parsedType))
-                return BadRequest($"Unknown transaction type: {type}");
-            typeEnum = parsedType;
-        }
+	// POST api/transactions/import
+	[HttpPost("import")]
+	[Consumes("multipart/form-data")]
+	[ProducesResponseType(typeof(ImportResultDto), StatusCodes.Status200OK)]
+	[ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+	public async Task<IActionResult> ImportTransactions(
+		[FromForm] Guid budgetId,
+		IFormFile? file)
+	{
+		if (file == null || file.Length == 0)
+			return BadRequest(new { error = "No file uploaded" });
 
-        var query = new GetTransactionsQuery
-        {
-            BudgetId = budgetId,
-            DateRange = DateRange.Create(startDate, endDate),
-            Type = typeEnum,
-            Category = category,
-            MinAmount = minAmount.HasValue ? (decimal)minAmount.Value : null,
-            MaxAmount = maxAmount.HasValue ? (decimal)maxAmount.Value : null
-        };
+		await using var stream = file.OpenReadStream();
 
-        var response = await getHandler.Handle(query);
-        return Ok(response);
-    }
+		var command = new ImportTransactionsCommand(budgetId, stream, file.FileName);
+		var result = await mediator.Send(command);
 
-    [HttpDelete("{transactionId:guid}")]
-    public async Task<ActionResult> Delete(Guid budgetId, Guid transactionId)
-    {
-        var command = new DeleteTransactionCommand
-        {
-            TransactionId = transactionId,
-            BudgetId = budgetId
-
-        };
-
-        var result = await deleteHandler.Handle(command);
-        if (!result.IsDeleted)
-            return NotFound();
-
-        return NoContent();
-    }
+		return Ok(result);
+	}
 }

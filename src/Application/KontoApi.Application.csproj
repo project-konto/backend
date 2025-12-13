@@ -24,8 +24,6 @@
       <Folder Include="Features\Auth\Commands\" />
       <Folder Include="Features\Budgets\Commands\" />
       <Folder Include="Features\Budgets\Queries\" />
-      <Folder Include="Features\Transactions\Commands\" />
-      <Folder Include="Features\Transactions\Queries\" />
       <Folder Include="Features\Users\Commands\DeleteUser\" />
       <Folder Include="Features\Users\Commands\UpdateEmail\" />
       <Folder Include="Features\Users\Commands\UpdateProfile\" />
