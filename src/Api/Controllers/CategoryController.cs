@@ -1,49 +1,53 @@
 ﻿using KontoApi.Api.Contracts;
 using KontoApi.Application.Common.Interfaces;
+using KontoApi.Application.Features.Categories.Commands.CreateCategory;
+using KontoApi.Application.Features.Categories.Commands.DeleteCategory;
+using KontoApi.Application.Features.Categories.Commands.RenameCategory;
+using KontoApi.Application.Features.Categories.Queries.GetCategories;
 using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KontoApi.Api.Controllers;
 
-public class CategoryController(ICategoryRepository categoryRepository) : BaseController
+[ApiController]
+[Route("api/categories")]
+public class CategoryController: BaseController
 {
+    private readonly IMediator mediator;
+    
+    public CategoryController(IMediator mediator) =>
+        this.mediator = mediator;
+    
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<CategoryResponse>>> GetAll(CancellationToken cancellationToken)
-    {
-        var categories = await categoryRepository.GetAllAsync(cancellationToken);
-        return Ok(categories.Select(c => new CategoryResponse
-        {
-            Id = c.Id,
-            Name = c.Name,
-        }));
-    }
+    public async Task<IActionResult> GetAll(CancellationToken cancellationToken) =>
+        Ok(await mediator.Send(new GetCategoriesQuery(), cancellationToken));
+    
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken) =>
+        Ok(await mediator.Send(new GetCategoryByIdQuery { Id = id }, cancellationToken));
 
     [HttpPost]
-    public async Task<ActionResult<CategoryResponse>> Create([FromBody] CreateCategoryRequest request,
+    public async Task<IActionResult> Create([FromBody] CreateCategoryCommand command,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(request.Name))
-            return BadRequest("Category name is required");
-
-        var exists = await categoryRepository.ExistsByNameAsync(request.Name, cancellationToken);
-        if (exists)
-            return Conflict("Category already exists");
-
-        var category = new Category(request.Name);
-        await categoryRepository.AddAsync(category, cancellationToken);
-
-        return CreatedAtAction(nameof(GetAll), new { id = category.Id }, new CategoryResponse
-        {
-            Id = category.Id,
-            Name = category.Name,
-        });
+        var created = await mediator.Send(command, cancellationToken);
+        return CreatedAtAction(nameof(GetById), new { id = created }, created);
     }
 
-    [HttpDelete]
-    public async Task<ActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> Rename(Guid id, [FromBody] RenameCategoryCommand command,
+        CancellationToken cancellationToken)
     {
-        await categoryRepository.DeleteAsync(id, cancellationToken);
+        await mediator.Send(command with { Id = id }, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        await mediator.Send(new DeleteCategoryCommand(id), cancellationToken);
         return NoContent();
     }
 }
