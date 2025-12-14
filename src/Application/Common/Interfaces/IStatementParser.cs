@@ -1,4 +1,4 @@
-﻿using KontoApi.Application.Common.Models;
+using KontoApi.Application.Common.Models;
 using KontoApi.Application.DTOs;
 
 namespace KontoApi.Application.Interfaces;

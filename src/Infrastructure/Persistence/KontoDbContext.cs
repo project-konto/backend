@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
 using Microsoft.EntityFrameworkCore;

@@ -1,4 +1,4 @@
-﻿using KontoApi.Domain;
+using KontoApi.Domain;
 
 namespace KontoApi.Application.Common.Interfaces;
 

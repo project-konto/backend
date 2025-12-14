@@ -1,4 +1,4 @@
-﻿namespace KontoApi.Application.Exceptions;
+namespace KontoApi.Application.Exceptions;
 
 public class ForbiddenException : Exception
 {

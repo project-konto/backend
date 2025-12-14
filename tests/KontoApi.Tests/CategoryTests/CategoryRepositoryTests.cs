@@ -1,4 +1,4 @@
-﻿using KontoApi.Domain;
+using KontoApi.Domain;
 using KontoApi.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 

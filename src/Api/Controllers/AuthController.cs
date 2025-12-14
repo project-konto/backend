@@ -1,4 +1,4 @@
-﻿using KontoApi.Application.Features.Auth.Commands.Login;
+using KontoApi.Application.Features.Auth.Commands.Login;
 using KontoApi.Application.Features.Auth.Commands.Register;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

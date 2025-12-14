@@ -1,4 +1,4 @@
-﻿using KontoApi.Infrastructure.Persistence;
+using KontoApi.Infrastructure.Persistence;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 

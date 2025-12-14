@@ -1,4 +1,4 @@
-﻿using KontoApi.Api.Contracts;
+using KontoApi.Api.Contracts;
 using KontoApi.Application.Common.Interfaces;
 using KontoApi.Application.Features.Categories.Commands.CreateCategory;
 using KontoApi.Application.Features.Categories.Commands.DeleteCategory;

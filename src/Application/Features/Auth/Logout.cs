@@ -1,4 +1,4 @@
-﻿namespace KontoApi.Application.Users;
+namespace KontoApi.Application.Users;
 
 public class LogoutUserCommand
 {

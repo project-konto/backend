@@ -1,4 +1,4 @@
-﻿using KontoApi.Infrastructure;
+using KontoApi.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace KontoApi.Tests.CategoryTests;

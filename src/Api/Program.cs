@@ -6,8 +6,8 @@ using KontoApi.Application;
 using KontoApi.Infrastructure;
 using KontoApi.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateBootstrapLogger();

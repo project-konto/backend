@@ -1,7 +1,7 @@
-﻿using KontoApi.Application.Exceptions;
-using KontoApi.Application.Users;
 using KontoApi.Application.DTOs;
+using KontoApi.Application.Exceptions;
 using KontoApi.Application.Interfaces;
+using KontoApi.Application.Users;
 using KontoApi.Domain;
 
 namespace KontoApi.Application.Handlers;

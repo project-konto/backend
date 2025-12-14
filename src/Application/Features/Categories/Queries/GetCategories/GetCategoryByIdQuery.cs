@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 
 namespace KontoApi.Application.Features.Categories.Queries.GetCategories;
 

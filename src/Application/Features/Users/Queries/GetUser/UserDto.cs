@@ -1,4 +1,4 @@
-﻿namespace KontoApi.Application.Features.Users.Queries.GetUser;
+namespace KontoApi.Application.Features.Users.Queries.GetUser;
 
 public record UserDto(
     Guid Id,

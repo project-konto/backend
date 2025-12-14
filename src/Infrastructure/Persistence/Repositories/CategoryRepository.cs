@@ -1,4 +1,4 @@
-﻿using KontoApi.Application.Common.Interfaces;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
 using KontoApi.Infrastructure.Persistence;

@@ -1,4 +1,4 @@
-﻿namespace KontoApi.Api.Contracts;
+namespace KontoApi.Api.Contracts;
 
 public class RegisterRequest
 {

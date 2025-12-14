@@ -1,4 +1,4 @@
-﻿namespace KontoApi.Application.Interfaces;
+namespace KontoApi.Application.Interfaces;
 
 public interface IPasswordHasher
 {

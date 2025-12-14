@@ -1,4 +1,4 @@
-﻿using KontoApi.Application.Exceptions;
+using KontoApi.Application.Exceptions;
 using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
 using MediatR;
