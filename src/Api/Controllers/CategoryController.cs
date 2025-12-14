@@ -13,17 +13,17 @@ namespace KontoApi.Api.Controllers;
 
 [ApiController]
 [Route("api/categories")]
-public class CategoryController: BaseController
+public class CategoryController : BaseController
 {
     private readonly IMediator mediator;
-    
+
     public CategoryController(IMediator mediator) =>
         this.mediator = mediator;
-    
+
     [HttpGet]
     public async Task<IActionResult> GetAll(CancellationToken cancellationToken) =>
         Ok(await mediator.Send(new GetCategoriesQuery(), cancellationToken));
-    
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken) =>
         Ok(await mediator.Send(new GetCategoryByIdQuery { Id = id }, cancellationToken));
