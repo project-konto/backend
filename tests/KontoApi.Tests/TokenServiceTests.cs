@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
 using KontoApi.Infrastructure.Auth;
 using Microsoft.Extensions.Configuration;
@@ -9,7 +10,7 @@ namespace KontoApi.Tests;
 
 public class TokenServiceTests
 {
-    private readonly TokenService tokenService;
+    private readonly IJwtProvider jwtProvider;
 
     private const string TestSecretKey = "mwhgOXDScUd8EqB7AIEmS6clp8H/bjyRHKvaRz2Zc9k=";
     private const string TestIssuer = "TestIssuer";
@@ -25,7 +26,7 @@ public class TokenServiceTests
         configurationMock.Setup(x => x["Jwt:Audience"]).Returns(TestAudience);
         configurationMock.Setup(x => x["Jwt:ExpirationMinutes"]).Returns(TestExpirationMinutes);
 
-        tokenService = new(configurationMock.Object);
+        jwtProvider = new(configurationMock.Object);
     }
 
     private static User CreateTestUser(string name = "First Last", string email = "test@example.com")
@@ -40,7 +41,7 @@ public class TokenServiceTests
         var user = CreateTestUser();
 
         // Act
-        var token = tokenService.GenerateAccessToken(user);
+        var token = jwtProvider.GenerateAccessToken(user);
 
         // Assert
         Assert.NotNull(token);
@@ -54,7 +55,7 @@ public class TokenServiceTests
         var user = CreateTestUser();
 
         // Act
-        var token = tokenService.GenerateAccessToken(user);
+        var token = jwtProvider.GenerateAccessToken(user);
 
         // Assert - JWT has 3 parts separated by dots
         var parts = token.Split('.');
@@ -68,7 +69,7 @@ public class TokenServiceTests
         var user = CreateTestUser("John Doe", "john@example.com");
 
         // Act
-        var token = tokenService.GenerateAccessToken(user);
+        var token = jwtProvider.GenerateAccessToken(user);
 
         // Assert
         var handler = new JwtSecurityTokenHandler();
@@ -86,7 +87,7 @@ public class TokenServiceTests
         var user = CreateTestUser();
 
         // Act
-        var token = tokenService.GenerateAccessToken(user);
+        var token = jwtProvider.GenerateAccessToken(user);
 
         // Assert
         var handler = new JwtSecurityTokenHandler();
@@ -104,7 +105,7 @@ public class TokenServiceTests
         var expectedExpiration = DateTime.UtcNow.AddMinutes(60);
 
         // Act
-        var token = tokenService.GenerateAccessToken(user);
+        var token = jwtProvider.GenerateAccessToken(user);
 
         // Assert
         var handler = new JwtSecurityTokenHandler();
@@ -139,13 +140,13 @@ public class TokenServiceTests
         var user = CreateTestUser(name, email);
 
         // Act
-        var token = tokenService.GenerateAccessToken(user);
+        var token = jwtProvider.GenerateAccessToken(user);
 
         // Assert
         Assert.NotNull(token);
         Assert.NotEmpty(token);
 
-        var userId = tokenService.ValidateToken(token);
+        var userId = jwtProvider.ValidateToken(token);
         Assert.NotNull(userId);
         Assert.Equal(user.Id, userId);
     }
@@ -158,7 +159,7 @@ public class TokenServiceTests
     public void GenerateRefreshToken_ReturnsNonEmptyString()
     {
         // Act
-        var refreshToken = tokenService.GenerateRefreshToken();
+        var refreshToken = jwtProvider.GenerateRefreshToken();
 
         // Assert
         Assert.NotNull(refreshToken);
@@ -169,7 +170,7 @@ public class TokenServiceTests
     public void GenerateRefreshToken_ReturnsBase64String()
     {
         // Act
-        var refreshToken = tokenService.GenerateRefreshToken();
+        var refreshToken = jwtProvider.GenerateRefreshToken();
 
         // Assert - Should be valid Base64
         var bytes = Convert.FromBase64String(refreshToken);
@@ -180,8 +181,8 @@ public class TokenServiceTests
     public void GenerateRefreshToken_CalledTwice_ReturnsDifferentTokens()
     {
         // Act
-        var token1 = tokenService.GenerateRefreshToken();
-        var token2 = tokenService.GenerateRefreshToken();
+        var token1 = jwtProvider.GenerateRefreshToken();
+        var token2 = jwtProvider.GenerateRefreshToken();
 
         // Assert
         Assert.NotEqual(token1, token2);
@@ -192,7 +193,7 @@ public class TokenServiceTests
     {
         // Act
         var tokens = Enumerable.Range(0, 100)
-            .Select(_ => tokenService.GenerateRefreshToken())
+            .Select(_ => jwtProvider.GenerateRefreshToken())
             .ToList();
 
         // Assert - All tokens should be unique
@@ -208,10 +209,10 @@ public class TokenServiceTests
     {
         // Arrange
         var user = CreateTestUser();
-        var token = tokenService.GenerateAccessToken(user);
+        var token = jwtProvider.GenerateAccessToken(user);
 
         // Act
-        var userId = tokenService.ValidateToken(token);
+        var userId = jwtProvider.ValidateToken(token);
 
         // Assert
         Assert.NotNull(userId);
@@ -225,7 +226,7 @@ public class TokenServiceTests
         var invalidToken = "invalid_token";
 
         // Act
-        var userId = tokenService.ValidateToken(invalidToken);
+        var userId = jwtProvider.ValidateToken(invalidToken);
 
         // Assert
         Assert.Null(userId);
@@ -235,7 +236,7 @@ public class TokenServiceTests
     public void ValidateToken_WithEmptyToken_ReturnsNull()
     {
         // Act
-        var userId = tokenService.ValidateToken(string.Empty);
+        var userId = jwtProvider.ValidateToken(string.Empty);
 
         // Assert
         Assert.Null(userId);
@@ -248,7 +249,7 @@ public class TokenServiceTests
         var malformedToken = "not_a_jwt_token";
 
         // Act
-        var userId = tokenService.ValidateToken(malformedToken);
+        var userId = jwtProvider.ValidateToken(malformedToken);
 
         // Assert
         Assert.Null(userId);
@@ -269,7 +270,7 @@ public class TokenServiceTests
         var token = differentTokenService.GenerateAccessToken(user);
 
         // Act - Validate with original service (different key)
-        var userId = tokenService.ValidateToken(token);
+        var userId = jwtProvider.ValidateToken(token);
 
         // Assert
         Assert.Null(userId);
@@ -290,7 +291,7 @@ public class TokenServiceTests
         var token = wrongIssuerService.GenerateAccessToken(user);
 
         // Act
-        var userId = tokenService.ValidateToken(token);
+        var userId = jwtProvider.ValidateToken(token);
 
         // Assert
         Assert.Null(userId);
@@ -311,7 +312,7 @@ public class TokenServiceTests
         var token = wrongAudienceService.GenerateAccessToken(user);
 
         // Act
-        var userId = tokenService.ValidateToken(token);
+        var userId = jwtProvider.ValidateToken(token);
 
         // Assert
         Assert.Null(userId);
@@ -322,7 +323,7 @@ public class TokenServiceTests
     {
         // Arrange
         var user = CreateTestUser();
-        var token = tokenService.GenerateAccessToken(user);
+        var token = jwtProvider.GenerateAccessToken(user);
 
         var noKeyConfigMock = new Mock<IConfiguration>();
         noKeyConfigMock.Setup(x => x["Jwt:Key"]).Returns((string?)null);
@@ -344,8 +345,8 @@ public class TokenServiceTests
         var user = CreateTestUser("Integration Test User", "integration@test.com");
 
         // Act
-        var accessToken = tokenService.GenerateAccessToken(user);
-        var validatedUserId = tokenService.ValidateToken(accessToken);
+        var accessToken = jwtProvider.GenerateAccessToken(user);
+        var validatedUserId = jwtProvider.ValidateToken(accessToken);
 
         // Assert
         Assert.NotNull(validatedUserId);
@@ -359,8 +360,8 @@ public class TokenServiceTests
         var user = CreateTestUser();
 
         // Act
-        var accessToken = tokenService.GenerateAccessToken(user);
-        var refreshToken = tokenService.GenerateRefreshToken();
+        var accessToken = jwtProvider.GenerateAccessToken(user);
+        var refreshToken = jwtProvider.GenerateRefreshToken();
 
         // Assert
         Assert.NotEqual(accessToken, refreshToken);

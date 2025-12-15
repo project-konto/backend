@@ -1,13 +1,15 @@
 using System.Reflection;
 using System.Text;
-using FluentValidation.AspNetCore;
 using KontoApi.Api.Middleware;
+using KontoApi.Api.Services;
 using KontoApi.Application;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Infrastructure;
 using KontoApi.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateBootstrapLogger();
@@ -18,17 +20,14 @@ try
     var builder = WebApplication.CreateBuilder(args);
     var configuration = builder.Configuration;
 
-    builder.Services.AddDbContext<KontoDbContext>(options =>
-    {
-        options.UseNpgsql(configuration.GetConnectionString(nameof(KontoDbContext)));
-    });
+    builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
+
     builder.Services.AddHttpContextAccessor();
     builder.Services.AddHealthChecks();
     builder.Host.UseSerilog((context, loggerConfiguration)
         => loggerConfiguration.ReadFrom.Configuration(context.Configuration));
 
     builder.Services.AddControllers();
-    builder.Services.AddFluentValidationAutoValidation();
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen(options =>
     {
@@ -39,10 +38,40 @@ try
             Description = "Personal Finance Management API"
         });
 
+        options.AddSecurityDefinition("Bearer", new()
+        {
+            Description =
+                "JWT Authorization header using the Bearer scheme. \r\n\r\n Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\nExample: \"Bearer 12345token\"",
+            Name = "Authorization",
+            In = ParameterLocation.Header,
+            Type = SecuritySchemeType.ApiKey,
+            Scheme = "Bearer"
+        });
+
+        options.AddSecurityRequirement(new()
+        {
+            {
+                new()
+                {
+                    Reference = new()
+                    {
+                        Type = ReferenceType.SecurityScheme,
+                        Id = "Bearer"
+                    },
+                    Scheme = "oauth2",
+                    Name = "Bearer",
+                    In = ParameterLocation.Header,
+                },
+                new List<string>()
+            }
+        });
+
         var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
         var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
         options.IncludeXmlComments(xmlPath);
     });
+
+    System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
     builder.Services.AddAuthentication(options =>
         {

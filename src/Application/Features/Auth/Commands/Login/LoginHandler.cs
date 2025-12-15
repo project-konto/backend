@@ -7,7 +7,7 @@ namespace KontoApi.Application.Features.Auth.Commands.Login;
 public class LoginHandler(
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
-    ITokenService tokenService)
+    IJwtProvider jwtProvider)
     : IRequestHandler<LoginCommand, LoginResponse>
 {
     public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -17,7 +17,7 @@ public class LoginHandler(
         if (user == null || !passwordHasher.Verify(request.Password, user.HashedPassword))
             throw new UnauthorizedException("Invalid email or password");
 
-        var token = tokenService.GenerateAccessToken(user);
+        var token = jwtProvider.Generate(user);
 
         return new(token, user.Id, user.Name, user.Email);
     }

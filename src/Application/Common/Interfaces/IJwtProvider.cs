@@ -2,9 +2,8 @@ using KontoApi.Domain;
 
 namespace KontoApi.Application.Common.Interfaces;
 
-public interface ITokenService
+public interface IJwtProvider
 {
-    string GenerateAccessToken(User user);
+    string Generate(User user);
     string GenerateRefreshToken();
-    Guid? ValidateToken(string token);
 }
