@@ -55,15 +55,14 @@ public class BudgetController : BaseController
     }
 
 
-    // PUT api/budget/{id}?newName={newName}
-    [HttpPut("{id:guid}")]
+    // PUT api/budget/{id}/rename
+    [HttpPut("{id:guid}/rename")]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> RenameBudget(Guid id, [FromQuery] string newName)
+    public async Task<IActionResult> RenameBudget(Guid id, [FromBody] string newName)
     {
-        var command = new RenameBudgetCommand(id, newName);
-        await mediator.Send(command);
+        await mediator.Send(new RenameBudgetCommand(BudgetId: id, NewName: newName));
         return NoContent();
     }
 }
