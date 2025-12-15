@@ -1,5 +1,3 @@
-using KontoApi.Application.Features.Auth.Commands.Login;
-using KontoApi.Application.Features.Auth.Commands.Register;
 using KontoApi.Application.Features.Users.Commands.ChangePassword;
 using KontoApi.Application.Features.Users.Queries.GetUser;
 using MediatR;
@@ -13,6 +11,9 @@ public class UsersController : ControllerBase
 {
     private readonly IMediator mediator;
 
+    public UsersController(IMediator mediator)
+        => this.mediator = mediator;
+
     // GET api/users/{id}
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetUser(Guid id)
@@ -22,7 +23,7 @@ public class UsersController : ControllerBase
     }
 
     // PUT api/users/{id}/password
-    [HttpPut("{id}/password")]
+    [HttpPut("{id:guid}/password")]
     public async Task<IActionResult> ChangePassword(Guid id, [FromBody] ChangePasswordRequest request)
     {
         var command = new ChangePasswordCommand(id, request.CurrentPassword, request.NewPassword);

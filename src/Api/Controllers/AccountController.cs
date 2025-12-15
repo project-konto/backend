@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using KontoApi.Application.Accounts;
 using KontoApi.Application.Features.Accounts.Commands.CreateAccount;
 using KontoApi.Application.Features.Accounts.Commands.DeleteAccount;
 using KontoApi.Application.Features.Accounts.Queries.GetAccountOverview;
@@ -10,16 +9,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace KontoApi.Api.Controllers;
 
-
 [Authorize]
 public class AccountController : BaseController
 {
     private readonly IMediator mediator;
 
     public AccountController(IMediator mediator)
-    {
-        this.mediator = mediator;
-    }
+        => this.mediator = mediator;
 
     [HttpPost]
     public async Task<ActionResult> Create(CancellationToken cancellationToken)
@@ -55,11 +51,9 @@ public class AccountController : BaseController
     {
         var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-        if (!Guid.TryParse(userIdString, out var userId))
-        {
-            //лучше кидать исключение, которое поймает Middleware и вернет 401
-            throw new UnauthorizedAccessException("Invalid Token");
-        }
-        return userId;
+        return !Guid.TryParse(userIdString, out var userId)
+            ? throw
+                new UnauthorizedAccessException("Invalid Token")
+            : userId;
     }
 }
