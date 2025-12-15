@@ -3,7 +3,6 @@ using KontoApi.Application.Features.Transactions.Commands.AddTransaction;
 using KontoApi.Application.Features.Transactions.Commands.DeleteTransaction;
 using KontoApi.Application.Features.Transactions.Commands.ImportTransactions;
 using KontoApi.Application.Features.Transactions.Queries.GetTransactionById;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KontoApi.Api.Controllers;
@@ -11,13 +10,8 @@ namespace KontoApi.Api.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
-public class TransactionsController : ControllerBase
+public class TransactionsController : BaseController
 {
-    private readonly IMediator mediator;
-
-    public TransactionsController(IMediator mediator)
-        => this.mediator = mediator;
-
     // POST api/transactions
     [HttpPost]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
@@ -25,7 +19,7 @@ public class TransactionsController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> AddTransaction(AddTransactionCommand command)
     {
-        var transactionId = await mediator.Send(command);
+        var transactionId = await Mediator.Send(command);
         return Ok(new { TransactionId = transactionId });
     }
 
@@ -35,7 +29,7 @@ public class TransactionsController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetTransaction(Guid id)
     {
-        var result = await mediator.Send(new GetTransactionByIdQuery(id));
+        var result = await Mediator.Send(new GetTransactionByIdQuery(id));
         return Ok(result);
     }
 
@@ -48,7 +42,7 @@ public class TransactionsController : ControllerBase
         if (budgetId == Guid.Empty)
             return BadRequest(new { error = "budgetId query parameter is required" });
 
-        await mediator.Send(new DeleteTransactionCommand(BudgetId: budgetId, TransactionId: id));
+        await Mediator.Send(new DeleteTransactionCommand(BudgetId: budgetId, TransactionId: id));
         return NoContent();
     }
 
@@ -67,7 +61,7 @@ public class TransactionsController : ControllerBase
         await using var stream = file.OpenReadStream();
 
         var command = new ImportTransactionsCommand(budgetId, stream, file.FileName);
-        var result = await mediator.Send(command);
+        var result = await Mediator.Send(command);
 
         return Ok(result);
     }

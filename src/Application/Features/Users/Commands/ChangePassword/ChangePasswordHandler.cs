@@ -1,22 +1,14 @@
-using KontoApi.Application.Exceptions;
-using KontoApi.Application.Interfaces;
+using KontoApi.Application.Common.Exceptions;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
 
 namespace KontoApi.Application.Features.Users.Commands.ChangePassword;
 
 using MediatR;
 
-public class ChangePasswordHandler : IRequestHandler<ChangePasswordCommand>
+public class ChangePasswordHandler(IApplicationDbContext context, IPasswordHasher passwordHasher)
+    : IRequestHandler<ChangePasswordCommand>
 {
-    private readonly IApplicationDbContext context;
-    private readonly IPasswordHasher passwordHasher;
-
-    public ChangePasswordHandler(IApplicationDbContext context, IPasswordHasher passwordHasher)
-    {
-        this.context = context;
-        this.passwordHasher = passwordHasher;
-    }
-
     public async Task Handle(ChangePasswordCommand request, CancellationToken cancellationToken)
     {
         var user = await context.Users.FindAsync([request.UserId], cancellationToken);

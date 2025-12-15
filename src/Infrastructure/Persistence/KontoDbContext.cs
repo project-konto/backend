@@ -1,14 +1,12 @@
 using System.Reflection;
-using KontoApi.Application.Interfaces;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace KontoApi.Infrastructure.Persistence;
 
-public class KontoDbContext : DbContext, IApplicationDbContext
+public class KontoDbContext(DbContextOptions<KontoDbContext> options) : DbContext(options), IApplicationDbContext
 {
-    public KontoDbContext(DbContextOptions<KontoDbContext> options) : base(options) { }
-
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Budget> Budgets { get; set; }
     public DbSet<Category> Categories { get; set; }

@@ -1,23 +1,18 @@
-using KontoApi.Application.Exceptions;
-using KontoApi.Application.Interfaces;
+using KontoApi.Application.Common.Exceptions;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
 using MediatR;
 
 namespace KontoApi.Application.Features.Budgets.Queries.GetBudgetDetails;
 
-public class GetBudgetDetailsHandler : IRequestHandler<GetBudgetDetailsQuery, BudgetDetailsDto>
+public class GetBudgetDetailsHandler(IBudgetRepository budgetRepository)
+    : IRequestHandler<GetBudgetDetailsQuery, BudgetDetailsDto>
 {
-    private readonly IBudgetRepository budgetRepository;
-
-    public GetBudgetDetailsHandler(IBudgetRepository budgetRepository)
-        => this.budgetRepository = budgetRepository;
-
     public async Task<BudgetDetailsDto> Handle(GetBudgetDetailsQuery request, CancellationToken ct)
     {
-        // Repository includes Transactions and Categories automatically
         var budget = await budgetRepository.GetByIdAsync(request.BudgetId, ct);
-
-        if (budget == null) throw new NotFoundException(typeof(Budget), request.BudgetId);
+        if (budget == null)
+            throw new NotFoundException(typeof(Budget), request.BudgetId);
 
         return new(
             budget.Id,

@@ -1,4 +1,4 @@
-using KontoApi.Application.Interfaces;
+using KontoApi.Application.Common.Interfaces;
 
 namespace KontoApi.Infrastructure.Services;
 

@@ -1,5 +1,5 @@
 using KontoApi.Domain;
-using KontoApi.Infrastructure;
+using KontoApi.Infrastructure.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 namespace KontoApi.Tests.CategoryTests;

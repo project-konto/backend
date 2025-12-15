@@ -1,19 +1,12 @@
-using KontoApi.Application.Exceptions;
-using KontoApi.Application.Interfaces;
+using KontoApi.Application.Common.Exceptions;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
 using MediatR;
 
 namespace KontoApi.Application.Features.Budgets.Commands.RenameBudget;
 
-public class RenameBudgetHandler : IRequestHandler<RenameBudgetCommand>
+public class RenameBudgetHandler(IBudgetRepository budgetRepository) : IRequestHandler<RenameBudgetCommand>
 {
-    private readonly IBudgetRepository budgetRepository;
-
-    public RenameBudgetHandler(IBudgetRepository budgetRepository)
-    {
-        this.budgetRepository = budgetRepository;
-    }
-
     public async Task Handle(RenameBudgetCommand request, CancellationToken ct)
     {
         var budget = await budgetRepository.GetByIdAsync(request.BudgetId, ct);

@@ -36,7 +36,7 @@ public class Transaction
 
     private Transaction()
     {
-        ; // For ORM
+        /* For ORM */
     }
 
     public void UpdateCategory(Category newCategory)

@@ -14,7 +14,7 @@ public class Category : IComparable<Category>, IEquatable<Category>
 
     private Category()
     {
-        ; // For ORM
+        /* For ORM */
     }
 
     public void Rename(string newName)

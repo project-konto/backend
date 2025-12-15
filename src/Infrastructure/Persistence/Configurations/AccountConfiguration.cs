@@ -20,7 +20,7 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
             .HasForeignKey("AccountId")
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Metadata.FindNavigation(nameof(Account.Budgets))!
+        builder.Metadata.FindNavigation(nameof(Account.Budgets))?
             .SetPropertyAccessMode(PropertyAccessMode.Field);
     }
 }

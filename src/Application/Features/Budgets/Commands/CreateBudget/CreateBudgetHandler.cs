@@ -1,17 +1,12 @@
-using KontoApi.Application.Exceptions;
-using KontoApi.Application.Interfaces;
+using KontoApi.Application.Common.Exceptions;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
 using MediatR;
 
 namespace KontoApi.Application.Features.Budgets.Commands.CreateBudget;
 
-public class CreateBudgetHandler : IRequestHandler<CreateBudgetCommand, Guid>
+public class CreateBudgetHandler(IAccountRepository accountRepository) : IRequestHandler<CreateBudgetCommand, Guid>
 {
-    private readonly IAccountRepository accountRepository;
-
-    public CreateBudgetHandler(IAccountRepository accountRepository)
-        => this.accountRepository = accountRepository;
-
     public async Task<Guid> Handle(CreateBudgetCommand request, CancellationToken ct)
     {
         var account = await accountRepository.GetByIdAsync(request.AccountId, ct);

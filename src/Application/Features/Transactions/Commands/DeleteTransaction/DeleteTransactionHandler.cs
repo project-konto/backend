@@ -1,17 +1,12 @@
-using KontoApi.Application.Exceptions;
-using KontoApi.Application.Interfaces;
+using KontoApi.Application.Common.Exceptions;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
 using MediatR;
 
 namespace KontoApi.Application.Features.Transactions.Commands.DeleteTransaction;
 
-public class DeleteTransactionHandler : IRequestHandler<DeleteTransactionCommand>
+public class DeleteTransactionHandler(IBudgetRepository budgetRepository) : IRequestHandler<DeleteTransactionCommand>
 {
-    private readonly IBudgetRepository budgetRepository;
-
-    public DeleteTransactionHandler(IBudgetRepository budgetRepository)
-        => this.budgetRepository = budgetRepository;
-
     public async Task Handle(DeleteTransactionCommand request, CancellationToken cancellationToken)
     {
         var budget = await budgetRepository.GetByIdAsync(request.BudgetId, cancellationToken);

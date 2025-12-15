@@ -34,8 +34,8 @@ public class CategorySeederTests
         var (context, connection) = DbContextFactory.CreateSqliteInMemory();
         await using var _ = connection;
 
-        context.Categories.Add(new Domain.Category("rent"));
-        context.Categories.Add(new Domain.Category("taxes"));
+        context.Categories.Add(new("rent"));
+        context.Categories.Add(new("taxes"));
 
         await context.SaveChangesAsync();
         await CategorySeeder.SeedAsync(context);

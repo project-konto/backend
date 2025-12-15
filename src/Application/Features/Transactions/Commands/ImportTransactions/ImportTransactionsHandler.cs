@@ -1,26 +1,16 @@
-using KontoApi.Application.Exceptions;
-using KontoApi.Application.Interfaces;
+using KontoApi.Application.Common.Exceptions;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
 using MediatR;
 
 namespace KontoApi.Application.Features.Transactions.Commands.ImportTransactions;
 
-public class ImportTransactionsHandler : IRequestHandler<ImportTransactionsCommand, ImportResultDto>
+public class ImportTransactionsHandler(
+    IBudgetRepository budgetRepository,
+    IStatementParser statementParser,
+    IApplicationDbContext dbContext)
+    : IRequestHandler<ImportTransactionsCommand, ImportResultDto>
 {
-    private readonly IBudgetRepository budgetRepository;
-    private readonly IStatementParser statementParser;
-    private readonly IApplicationDbContext dbContext;
-
-    public ImportTransactionsHandler(
-        IBudgetRepository budgetRepository,
-        IStatementParser statementParser,
-        IApplicationDbContext dbContext)
-    {
-        this.budgetRepository = budgetRepository;
-        this.statementParser = statementParser;
-        this.dbContext = dbContext;
-    }
-
     public async Task<ImportResultDto> Handle(ImportTransactionsCommand request, CancellationToken cancellationToken)
     {
         var budget = await budgetRepository.GetByIdAsync(request.BudgetId, cancellationToken);

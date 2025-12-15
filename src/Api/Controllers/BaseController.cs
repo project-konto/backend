@@ -1,3 +1,4 @@
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KontoApi.Api.Controllers;
@@ -6,5 +7,8 @@ namespace KontoApi.Api.Controllers;
 [ApiController]
 public abstract class BaseController : ControllerBase
 {
-    // TODO
+    private ISender? mediator;
+
+    protected ISender Mediator
+        => mediator ??= HttpContext.RequestServices.GetRequiredService<ISender>();
 }

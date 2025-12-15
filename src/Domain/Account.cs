@@ -20,7 +20,7 @@ public class Account
 
     private Account()
     {
-        ; // For ORM
+        /* For ORM */
     }
 
 

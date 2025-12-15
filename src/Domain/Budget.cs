@@ -23,7 +23,7 @@ public class Budget
 
     private Budget()
     {
-        ; // For ORM
+        /* For ORM */
     }
 
 

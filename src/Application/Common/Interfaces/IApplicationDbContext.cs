@@ -1,7 +1,7 @@
 using KontoApi.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace KontoApi.Application.Interfaces;
+namespace KontoApi.Application.Common.Interfaces;
 
 public interface IApplicationDbContext
 {

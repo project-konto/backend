@@ -30,7 +30,7 @@ public class BudgetConfiguration : IEntityTypeConfiguration<Budget>
             .HasForeignKey("BudgetId")
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.Metadata.FindNavigation(nameof(Budget.Transactions))!
+        builder.Metadata.FindNavigation(nameof(Budget.Transactions))?
             .SetPropertyAccessMode(PropertyAccessMode.Field);
     }
 }

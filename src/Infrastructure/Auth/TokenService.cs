@@ -2,12 +2,12 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using KontoApi.Application.Interfaces;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace KontoApi.Infrastructure;
+namespace KontoApi.Infrastructure.Auth;
 
 /// <summary>
 /// Generates and validates JWT access tokens and creates refresh tokens

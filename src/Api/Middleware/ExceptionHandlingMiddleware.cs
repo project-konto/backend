@@ -1,9 +1,9 @@
 using System.Net;
 using System.Text.Json;
-using FluentValidation;
 using KontoApi.Api.Contracts;
-using KontoApi.Application.Exceptions;
+using KontoApi.Application.Common.Exceptions;
 using Serilog;
+using ValidationException = FluentValidation.ValidationException;
 
 namespace KontoApi.Api.Middleware;
 

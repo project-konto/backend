@@ -1,16 +1,11 @@
-using KontoApi.Application.Interfaces;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
-using KontoApi.Infrastructure;
-using KontoApi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-public class UserRepository : IUserRepository
+namespace KontoApi.Infrastructure.Persistence.Repositories;
+
+public class UserRepository(KontoDbContext dbContext) : IUserRepository
 {
-    private readonly KontoDbContext dbContext;
-
-    public UserRepository(KontoDbContext dbContext)
-        => this.dbContext = dbContext;
-
     public async Task AddAsync(User user, CancellationToken ct)
     {
         await dbContext.Users.AddAsync(user, ct);
@@ -18,16 +13,12 @@ public class UserRepository : IUserRepository
     }
 
     public async Task<User?> GetByEmailAsync(string email, CancellationToken ct)
-    {
-        return await dbContext.Users
+        => await dbContext.Users
             .FirstOrDefaultAsync(u => u.Email == email, ct);
-    }
 
     public async Task<User?> GetByIdAsync(Guid id, CancellationToken ct)
-    {
-        return await dbContext.Users
+        => await dbContext.Users
             .FirstOrDefaultAsync(u => u.Id == id, ct);
-    }
 
     public async Task UpdateAsync(User user, CancellationToken ct)
     {

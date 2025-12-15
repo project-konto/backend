@@ -1,21 +1,13 @@
-using KontoApi.Application.Exceptions;
-using KontoApi.Application.Interfaces;
+using KontoApi.Application.Common.Exceptions;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
 using MediatR;
 
 namespace KontoApi.Application.Features.Auth.Commands.Register;
 
-public class RegisterHandler : IRequestHandler<RegisterCommand, Guid>
+public class RegisterHandler(IUserRepository userRepository, IPasswordHasher passwordHasher)
+    : IRequestHandler<RegisterCommand, Guid>
 {
-    private readonly IUserRepository userRepository;
-    private readonly IPasswordHasher passwordHasher;
-
-    public RegisterHandler(IUserRepository userRepository, IPasswordHasher passwordHasher)
-    {
-        this.userRepository = userRepository;
-        this.passwordHasher = passwordHasher;
-    }
-
     public async Task<Guid> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         var existingUser = await userRepository.GetByEmailAsync(request.Email, cancellationToken);

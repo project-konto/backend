@@ -1,16 +1,11 @@
-using KontoApi.Application.Interfaces;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
-using KontoApi.Infrastructure;
-using KontoApi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-public class BudgetRepository : IBudgetRepository
+namespace KontoApi.Infrastructure.Persistence.Repositories;
+
+public class BudgetRepository(KontoDbContext dbContext) : IBudgetRepository
 {
-    private readonly KontoDbContext dbContext;
-
-    public BudgetRepository(KontoDbContext dbContext)
-        => this.dbContext = dbContext;
-
     public async Task<Budget?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         return await dbContext.Budgets

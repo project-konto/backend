@@ -1,6 +1,5 @@
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Application.Common.Models;
-using KontoApi.Application.DTOs;
-using KontoApi.Application.Interfaces;
 
 namespace KontoApi.Infrastructure.Services;
 

@@ -1,6 +1,5 @@
 namespace KontoApi.Domain;
 
-
 public class User
 {
     public Guid Id { get; private set; }
@@ -32,7 +31,7 @@ public class User
 
     private User()
     {
-        ; // For ORM
+        /* For ORM */
     }
 
     public void ChangeName(string newName)

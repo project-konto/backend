@@ -1,17 +1,12 @@
-using KontoApi.Application.Interfaces;
+using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
 using KontoApi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace KontoApi.Infrastructure.Repositories;
 
-public class AccountRepository : IAccountRepository
+public class AccountRepository(KontoDbContext dbContext) : IAccountRepository
 {
-    private readonly KontoDbContext dbContext;
-
-    public AccountRepository(KontoDbContext dbContext)
-        => this.dbContext = dbContext;
-
     public async Task AddAsync(Account account, CancellationToken cancellationToken = default)
     {
         await dbContext.Accounts.AddAsync(account, cancellationToken);

@@ -5,7 +5,10 @@ public class Money : IEquatable<Money>, IComparable<Money>
     public decimal Value { get; init; }
     public string Currency { get; init; }
 
-    private Money() { /* ORM */ }
+    private Money()
+    {
+        /* ORM */
+    }
 
     public Money(decimal value, string currency)
     {

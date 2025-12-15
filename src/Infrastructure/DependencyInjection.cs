@@ -1,6 +1,7 @@
 using KontoApi.Application.Common.Interfaces;
-using KontoApi.Application.Interfaces;
+using KontoApi.Infrastructure.Auth;
 using KontoApi.Infrastructure.Persistence;
+using KontoApi.Infrastructure.Persistence.Repositories;
 using KontoApi.Infrastructure.Repositories;
 using KontoApi.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;

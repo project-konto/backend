@@ -6,7 +6,7 @@ namespace KontoApi.Infrastructure;
 
 public static class CategorySeeder
 {
-    private static readonly string[] DefaultNames =
+    private static readonly string[] defaultNames =
     [
         "rent",
         "taxes",
@@ -22,11 +22,11 @@ public static class CategorySeeder
 
     public static async Task SeedAsync(KontoDbContext context, CancellationToken cancellationToken = default)
     {
-        foreach (var name in DefaultNames)
+        foreach (var name in defaultNames)
         {
             var exists = await context.Categories.AnyAsync(c => c.Name == name, cancellationToken);
             if (!exists)
-                context.Categories.Add(new Category(name));
+                context.Categories.Add(new(name));
         }
 
         await context.SaveChangesAsync(cancellationToken);

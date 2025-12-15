@@ -1,10 +1,8 @@
 using KontoApi.Application.Common.Interfaces;
-using KontoApi.Application.Interfaces;
 using KontoApi.Domain;
-using KontoApi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace KontoApi.Infrastructure;
+namespace KontoApi.Infrastructure.Persistence.Repositories;
 
 public class CategoryRepository(KontoDbContext context) : ICategoryRepository
 {

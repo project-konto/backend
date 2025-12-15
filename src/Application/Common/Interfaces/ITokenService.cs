@@ -1,6 +1,6 @@
 using KontoApi.Domain;
 
-namespace KontoApi.Application.Interfaces;
+namespace KontoApi.Application.Common.Interfaces;
 
 public interface ITokenService
 {

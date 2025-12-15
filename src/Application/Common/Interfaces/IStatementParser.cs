@@ -1,7 +1,6 @@
 using KontoApi.Application.Common.Models;
-using KontoApi.Application.DTOs;
 
-namespace KontoApi.Application.Interfaces;
+namespace KontoApi.Application.Common.Interfaces;
 
 public interface IStatementParser
 {
