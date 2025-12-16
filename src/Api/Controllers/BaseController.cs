@@ -1,3 +1,4 @@
+using KontoApi.Application.Common.Exceptions;
 using KontoApi.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -18,5 +19,5 @@ public abstract class BaseController : ControllerBase
         currentUserService ??= HttpContext.RequestServices.GetRequiredService<ICurrentUserService>();
 
     protected Guid UserId => CurrentUser.UserId
-                             ?? throw new UnauthorizedAccessException("User is not authenticated");
+                             ?? throw new UnauthorizedException("User is not authenticated");
 }

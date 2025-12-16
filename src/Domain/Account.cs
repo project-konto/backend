@@ -3,17 +3,22 @@ namespace KontoApi.Domain;
 public class Account
 {
     public Guid Id { get; private set; }
-    public User User { get; private set; }
+    public User User { get; init; }
+    public string Name { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
 
     private readonly List<Budget> budgets = [];
     public IReadOnlyCollection<Budget> Budgets => budgets.AsReadOnly();
 
-    public Account(User user)
+    public Account(User user, string name)
     {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Account name cannot be empty", nameof(name));
+
         Id = Guid.NewGuid();
         User = user ?? throw new ArgumentNullException(nameof(user));
+        Name = name.Trim();
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
     }
@@ -32,6 +37,15 @@ public class Account
             throw new InvalidOperationException($"Budget {budget.Id} already exists in account");
 
         budgets.Add(budget);
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Rename(string newName)
+    {
+        if (string.IsNullOrWhiteSpace(newName))
+            throw new ArgumentException("Account name cannot be empty", nameof(newName));
+
+        Name = newName.Trim();
         UpdatedAt = DateTime.UtcNow;
     }
 

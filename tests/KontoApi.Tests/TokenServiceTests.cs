@@ -2,7 +2,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
-using KontoApi.Infrastructure.Auth;
 using Microsoft.Extensions.Configuration;
 using Moq;
 

@@ -8,19 +8,15 @@ namespace KontoApi.Application.Features.Accounts.Commands.CreateAccount;
 public class CreateAccountHandler(IAccountRepository accountRepository, IUserRepository userRepository)
     : IRequestHandler<CreateAccountCommand, Guid>
 {
-    public async Task<Guid> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
+    public async Task<Guid> Handle(CreateAccountCommand request, CancellationToken ct)
     {
-        var user = await userRepository.GetByIdAsync(request.UserId, cancellationToken);
+        var user = await userRepository.GetByIdAsync(request.UserId, ct);
         if (user == null)
             throw new NotFoundException(typeof(User), request.UserId);
 
-        var existingAccounts = await accountRepository.GetByUserIdAsync(request.UserId, cancellationToken);
-        if (existingAccounts.Any())
-            throw new ConflictException("User already has an account");
+        var account = new Account(user, request.Name);
 
-        var account = new Account(user);
-
-        await accountRepository.AddAsync(account, cancellationToken);
+        await accountRepository.AddAsync(account, ct);
 
         return account.Id;
     }

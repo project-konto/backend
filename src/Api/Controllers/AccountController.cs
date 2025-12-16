@@ -5,7 +5,6 @@ using KontoApi.Application.Features.Accounts.Queries.GetAccountOverview;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-
 namespace KontoApi.Api.Controllers;
 
 [Authorize]
@@ -16,13 +15,11 @@ public class AccountController : BaseController
     // POST api/account
     [HttpPost]
     [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
-    public async Task<ActionResult> Create(CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> Create([FromBody] CreateAccountRequest request, CancellationToken cancellationToken)
     {
-        var command = new CreateAccountCommand(UserId);
+        var command = new CreateAccountCommand(UserId, request.Name);
         var accountId = await Mediator.Send(command, cancellationToken);
-
         return CreatedAtAction(nameof(Get), new { }, new { AccountId = accountId });
     }
 
@@ -34,7 +31,6 @@ public class AccountController : BaseController
     {
         var query = new GetAccountOverviewQuery(UserId);
         var result = await Mediator.Send(query, cancellationToken);
-
         return Ok(result);
     }
 
@@ -46,7 +42,8 @@ public class AccountController : BaseController
     {
         var command = new DeleteAccountCommand(UserId);
         await Mediator.Send(command, cancellationToken);
-
         return NoContent();
     }
 }
+
+public record CreateAccountRequest(string Name);

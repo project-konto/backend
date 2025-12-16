@@ -5,12 +5,14 @@ using MediatR;
 
 namespace KontoApi.Application.Features.Budgets.Commands.CreateBudget;
 
-public class CreateBudgetHandler(IAccountRepository accountRepository) : IRequestHandler<CreateBudgetCommand, Guid>
+public class CreateBudgetHandler(IAccountRepository accountRepository, ICurrentUserService currentUserService)
+    : IRequestHandler<CreateBudgetCommand, Guid>
 {
     public async Task<Guid> Handle(CreateBudgetCommand request, CancellationToken ct)
     {
         var account = await accountRepository.GetByIdAsync(request.AccountId, ct);
-        if (account == null) throw new NotFoundException(typeof(Account), request.AccountId);
+        if (account == null || account.User.Id != currentUserService.UserId)
+            throw new NotFoundException(typeof(Account), request.AccountId);
 
         var money = new Money(request.InitialBalance, request.Currency);
         var budget = new Budget(request.Name, money);

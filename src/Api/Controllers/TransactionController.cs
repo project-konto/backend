@@ -3,10 +3,13 @@ using KontoApi.Application.Features.Transactions.Commands.AddTransaction;
 using KontoApi.Application.Features.Transactions.Commands.DeleteTransaction;
 using KontoApi.Application.Features.Transactions.Commands.ImportTransactions;
 using KontoApi.Application.Features.Transactions.Queries.GetTransactionById;
+using KontoApi.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KontoApi.Api.Controllers;
 
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 [Produces("application/json")]
@@ -14,35 +17,55 @@ public class TransactionsController : BaseController
 {
     // POST api/transactions
     [HttpPost]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> AddTransaction(AddTransactionCommand command)
+    public async Task<IActionResult> AddTransaction(
+        [FromBody] AddTransactionRequest request,
+        CancellationToken cancellationToken)
     {
-        var transactionId = await Mediator.Send(command);
-        return Ok(new { TransactionId = transactionId });
+        var command = new AddTransactionCommand(
+            request.BudgetId,
+            request.Amount,
+            request.Currency,
+            request.Type,
+            request.CategoryId,
+            request.Date,
+            request.Description
+        );
+
+        var transactionId = await Mediator.Send(command, cancellationToken);
+
+        return CreatedAtAction(nameof(GetTransaction), new { id = transactionId },
+            new { TransactionId = transactionId });
     }
 
     // GET api/transactions/{id}
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(TransactionDetailDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetTransaction(Guid id)
+    public async Task<IActionResult> GetTransaction(Guid id, CancellationToken cancellationToken)
     {
-        var result = await Mediator.Send(new GetTransactionByIdQuery(id));
+        var result = await Mediator.Send(new GetTransactionByIdQuery(id), cancellationToken);
         return Ok(result);
     }
 
     // DELETE api/transactions/{id}?budgetId={budgetId}
     [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> DeleteTransaction(Guid id, [FromQuery] Guid budgetId)
+    public async Task<IActionResult> DeleteTransaction(
+        Guid id,
+        [FromQuery] Guid budgetId,
+        CancellationToken cancellationToken)
     {
         if (budgetId == Guid.Empty)
-            return BadRequest(new { error = "budgetId query parameter is required" });
+            return BadRequest(new ErrorResponse(
+                StatusCodes.Status400BadRequest, "budgetId query parameter is required", null
+            ));
 
-        await Mediator.Send(new DeleteTransactionCommand(BudgetId: budgetId, TransactionId: id));
+        await Mediator.Send(new DeleteTransactionCommand(BudgetId: budgetId, TransactionId: id), cancellationToken);
         return NoContent();
     }
 
@@ -53,16 +76,29 @@ public class TransactionsController : BaseController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> ImportTransactions(
         [FromForm] Guid budgetId,
-        IFormFile? file)
+        IFormFile? file,
+        CancellationToken cancellationToken)
     {
         if (file == null || file.Length == 0)
-            return BadRequest(new { error = "No file uploaded" });
+            return BadRequest(new ErrorResponse(
+                StatusCodes.Status400BadRequest, "No file uploaded", null
+            ));
 
         await using var stream = file.OpenReadStream();
 
         var command = new ImportTransactionsCommand(budgetId, stream, file.FileName);
-        var result = await Mediator.Send(command);
+        var result = await Mediator.Send(command, cancellationToken);
 
         return Ok(result);
     }
 }
+
+public record AddTransactionRequest(
+    Guid BudgetId,
+    decimal Amount,
+    string Currency,
+    TransactionType Type,
+    Guid CategoryId,
+    DateTime Date,
+    string? Description
+);

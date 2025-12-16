@@ -11,9 +11,13 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
         builder.HasKey(a => a.Id);
 
         builder.HasOne(a => a.User)
-            .WithOne()
-            .HasForeignKey<Account>("UserId")
+            .WithMany()
+            .HasForeignKey("UserId")
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(a => a.Name)
+            .HasMaxLength(100)
+            .IsRequired();
 
         builder.HasMany(a => a.Budgets)
             .WithOne()
