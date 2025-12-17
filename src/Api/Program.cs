@@ -80,18 +80,35 @@ try
         })
         .AddJwtBearer(options =>
         {
+            options.IncludeErrorDetails = true;
+
             options.TokenValidationParameters = new()
             {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]
-                                           ?? throw new InvalidOperationException("JWT Key not configured"))),
                 ValidateIssuer = true,
-                ValidIssuer = builder.Configuration["Jwt:Issuer"],
                 ValidateAudience = true,
-                ValidAudience = builder.Configuration["Jwt:Audience"],
                 ValidateLifetime = true,
-                ClockSkew = TimeSpan.Zero
+                ValidateIssuerSigningKey = true,
+
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new("Jwt key not set")))
+            };
+
+            options.Events = new()
+            {
+                OnAuthenticationFailed = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                    logger.LogError("Authentication failed: {Message}", context.Exception.Message);
+                    return Task.CompletedTask;
+                },
+                OnTokenValidated = context =>
+                {
+                    var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                    logger.LogInformation("Token validated successfully for user: {User}", context.Principal?.Identity?.Name);
+                    return Task.CompletedTask;
+                }
             };
         });
 

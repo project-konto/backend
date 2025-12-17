@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace KontoApi.Infrastructure.Migrations
 {
     [DbContext(typeof(KontoDbContext))]
-    [Migration("20251213110643_InitialCreate")]
+    [Migration("20251217042156_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -34,6 +34,11 @@ namespace KontoApi.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -42,8 +47,7 @@ namespace KontoApi.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId")
-                        .IsUnique();
+                    b.HasIndex("UserId");
 
                     b.ToTable("Accounts");
                 });
@@ -152,8 +156,8 @@ namespace KontoApi.Infrastructure.Migrations
             modelBuilder.Entity("KontoApi.Domain.Account", b =>
                 {
                     b.HasOne("KontoApi.Domain.User", "User")
-                        .WithOne()
-                        .HasForeignKey("KontoApi.Domain.Account", "UserId")
+                        .WithMany()
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
