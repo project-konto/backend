@@ -74,7 +74,7 @@ dotnet test
 
 ## API Endpoints
 
-TODO
+See interactive documentation and try out requests in [Swagger UI](http://localhost:5001/swagger)
 
 ## Contributing
 

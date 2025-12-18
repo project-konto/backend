@@ -21,6 +21,7 @@ public class Account
         Name = name.Trim();
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = DateTime.UtcNow;
+        budgets.Add(new Budget("Default", new Money(0, "RUB")));
     }
 
     private Account()

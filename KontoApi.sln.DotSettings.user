@@ -8,5 +8,6 @@
   &lt;TestAncestor&gt;
     &lt;TestId&gt;xUnit::DC598036-8206-4BA0-A562-DF4DC6088302::net10.0::KontoApi.Tests.CategoryTests.CategorySeederTests&lt;/TestId&gt;
     &lt;TestId&gt;xUnit::DC598036-8206-4BA0-A562-DF4DC6088302::net10.0::KontoApi.Tests.CategoryTests.CategoryRepositoryTests&lt;/TestId&gt;
+    &lt;TestId&gt;xUnit::DC598036-8206-4BA0-A562-DF4DC6088302::net10.0::KontoApi.Tests.Integration.AccountApiIntegrationTests&lt;/TestId&gt;
   &lt;/TestAncestor&gt;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

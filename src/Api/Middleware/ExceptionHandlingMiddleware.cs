@@ -4,6 +4,7 @@ using KontoApi.Api.Contracts;
 using KontoApi.Application.Common.Exceptions;
 using Serilog;
 using ValidationException = FluentValidation.ValidationException;
+using AppValidationException = KontoApi.Application.Common.Exceptions.ValidationException;
 
 namespace KontoApi.Api.Middleware;
 
@@ -26,7 +27,7 @@ public class ExceptionHandlingMiddleware(RequestDelegate next)
         var (statusCode, title) = exception switch
         {
             NotFoundException => (HttpStatusCode.NotFound, "Resource Not Found"),
-            BadRequestException or ValidationException => (HttpStatusCode.BadRequest, "Bad Request"),
+            BadRequestException or AppValidationException or ValidationException => (HttpStatusCode.BadRequest, "Bad Request"),
             UnauthorizedException => (HttpStatusCode.Unauthorized, "Unauthorized"),
             ForbiddenException => (HttpStatusCode.Forbidden, "Forbidden"),
             ConflictException => (HttpStatusCode.Conflict, "Conflict"),
@@ -34,7 +35,14 @@ public class ExceptionHandlingMiddleware(RequestDelegate next)
         };
 
         if (statusCode == HttpStatusCode.InternalServerError)
+        {
             Log.Error(exception, "Unhandled exception occurred");
+            try
+            {
+                System.IO.File.AppendAllText("/tmp/konto_app_exceptions.log", DateTime.UtcNow + " - " + exception + "\n\n");
+            }
+            catch { }
+        }
 
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)statusCode;

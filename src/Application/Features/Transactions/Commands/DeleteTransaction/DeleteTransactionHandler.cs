@@ -15,13 +15,11 @@ public class DeleteTransactionHandler(IBudgetRepository budgetRepository) : IReq
 
         try
         {
-            budget.RemoveTransaction(request.TransactionId);
+            await budgetRepository.DeleteTransactionAsync(request.BudgetId, request.TransactionId, cancellationToken);
         }
         catch (InvalidOperationException)
         {
             throw new NotFoundException(typeof(Transaction), request.TransactionId);
         }
-
-        await budgetRepository.UpdateAsync(budget, cancellationToken);
     }
 }
