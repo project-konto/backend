@@ -17,7 +17,7 @@ public class ImportTransactionsHandler(
         if (budget == null)
             throw new NotFoundException(typeof(Budget), request.BudgetId);
 
-        var parsedRecords = statementParser.Parse(request.FileStream);
+        var parsedRecords = await statementParser.ParseAsync(request.FileStream, cancellationToken);
 
         var success = 0;
         var failed = 0;
