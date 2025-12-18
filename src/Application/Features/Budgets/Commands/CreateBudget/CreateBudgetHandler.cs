@@ -17,9 +17,7 @@ public class CreateBudgetHandler(IAccountRepository accountRepository, ICurrentU
         var money = new Money(request.InitialBalance, request.Currency);
         var budget = new Budget(request.Name, money);
 
-        account.AddBudget(budget);
-
-        await accountRepository.UpdateAsync(account, ct);
+        await accountRepository.AddBudgetAsync(account.Id, budget, ct);
 
         return budget.Id;
     }

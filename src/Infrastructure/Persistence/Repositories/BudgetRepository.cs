@@ -26,6 +26,17 @@ public class BudgetRepository(KontoDbContext dbContext) : IBudgetRepository
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task AddTransactionAsync(Guid budgetId, Transaction transaction, CancellationToken cancellationToken = default)
+    {
+        var budget = await dbContext.Budgets.FindAsync(budgetId, cancellationToken);
+        if (budget == null)
+            throw new InvalidOperationException($"Budget {budgetId} does not exist in the store.");
+
+        await dbContext.Transactions.AddAsync(transaction, cancellationToken);
+        dbContext.Entry(transaction).Property("BudgetId").CurrentValue = budgetId;
+        await dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task DeleteAsync(Guid id, CancellationToken cancellationToken)
     {
         var budgetStub = await dbContext.Budgets.FindAsync([id], cancellationToken);
@@ -35,5 +46,15 @@ public class BudgetRepository(KontoDbContext dbContext) : IBudgetRepository
             dbContext.Budgets.Remove(budgetStub);
             await dbContext.SaveChangesAsync(cancellationToken);
         }
+    }
+
+    public async Task DeleteTransactionAsync(Guid budgetId, Guid transactionId, CancellationToken cancellationToken = default)
+    {
+        var tx = await dbContext.Transactions.FindAsync(transactionId, cancellationToken);
+        if (tx == null)
+            throw new InvalidOperationException($"Transaction {transactionId} not found");
+
+        dbContext.Transactions.Remove(tx);
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 }
