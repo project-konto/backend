@@ -30,4 +30,12 @@
         <ProjectReference Include="../..\src\Infrastructure\KontoApi.Infrastructure.csproj" />
     </ItemGroup>
 
+    <Target Name="CopyApiDepsJsonForIntegrationTests" AfterTargets="Build">
+        <PropertyGroup>
+          <ApiDepsJson>$(SolutionDir)src/Api/bin/Debug/net10.0/KontoApi.Api.deps.json</ApiDepsJson>
+          <TestHostDepsJson>$(OutDir)testhost.deps.json</TestHostDepsJson>
+        </PropertyGroup>
+        <Copy SourceFiles="$(ApiDepsJson)" DestinationFiles="$(TestHostDepsJson)" SkipUnchangedFiles="true" Condition="Exists('$(ApiDepsJson)')" />
+      </Target>
+
 </Project>
