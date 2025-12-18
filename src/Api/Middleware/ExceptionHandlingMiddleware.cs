@@ -24,15 +24,15 @@ public class ExceptionHandlingMiddleware(RequestDelegate next)
 
     private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-            var (statusCode, title) = exception switch
-            {
-                NotFoundException => (HttpStatusCode.NotFound, "Resource Not Found"),
-                BadRequestException or AppValidationException or ValidationException => (HttpStatusCode.BadRequest, "Bad Request"),
-                UnauthorizedException => (HttpStatusCode.Unauthorized, "Unauthorized"),
-                ForbiddenException => (HttpStatusCode.Forbidden, "Forbidden"),
-                ConflictException => (HttpStatusCode.Conflict, "Conflict"),
-                _ => (HttpStatusCode.InternalServerError, "Internal Server Error")
-            };
+        var (statusCode, title) = exception switch
+        {
+            NotFoundException => (HttpStatusCode.NotFound, "Resource Not Found"),
+            BadRequestException or AppValidationException or ValidationException => (HttpStatusCode.BadRequest, "Bad Request"),
+            UnauthorizedException => (HttpStatusCode.Unauthorized, "Unauthorized"),
+            ForbiddenException => (HttpStatusCode.Forbidden, "Forbidden"),
+            ConflictException => (HttpStatusCode.Conflict, "Conflict"),
+            _ => (HttpStatusCode.InternalServerError, "Internal Server Error")
+        };
 
         if (statusCode == HttpStatusCode.InternalServerError)
         {
