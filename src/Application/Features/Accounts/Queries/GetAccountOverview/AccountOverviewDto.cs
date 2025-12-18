@@ -2,7 +2,7 @@ namespace KontoApi.Application.Features.Accounts.Queries.GetAccountOverview;
 
 public record AccountOverviewDto(
     Guid Id,
-    string OwnerName,
+    string Name,
     DateTime CreatedAt,
     List<BudgetSummaryDto> Budgets
 );
