@@ -2,15 +2,19 @@ using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
 using KontoApi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace KontoApi.Infrastructure.Repositories;
 
-public class AccountRepository(KontoDbContext dbContext) : IAccountRepository
+public class AccountRepository(KontoDbContext dbContext, ILogger<AccountRepository> logger) : IAccountRepository
 {
     public async Task AddAsync(Account account, CancellationToken cancellationToken = default)
     {
+        logger.LogInformation("AccountRepository.AddAsync: adding account Id={AccountId} for UserId={UserId}", account.Id, account.User?.Id);
         await dbContext.Accounts.AddAsync(account, cancellationToken);
         await dbContext.SaveChangesAsync(cancellationToken);
+        var total = await dbContext.Accounts.CountAsync(cancellationToken);
+        logger.LogInformation("AccountRepository.AddAsync: saved account Id={AccountId}. Total accounts now={Total}", account.Id, total);
     }
 
     public async Task UpdateAsync(Account account, CancellationToken cancellationToken = default)
