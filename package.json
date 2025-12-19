@@ -1,0 +1,22 @@
+{
+  "name": "konto-api-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Node tooling for commit linting and git hooks",
+  "scripts": {
+    "prepare": "husky install",
+    "commit": "cz"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
+    "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
+    "husky": "^8.0.3"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}

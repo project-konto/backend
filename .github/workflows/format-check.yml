@@ -1,0 +1,33 @@
+name: Format Check
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore dependencies
+        run: dotnet restore KontoApi.sln
+
+      - name: Format code
+        run: dotnet format KontoApi.sln
+
+      - name: Check for changes
+        run: |
+          if [[ -n $(git status --porcelain) ]]; then
+            echo "Code formatting issues detected. Please run 'dotnet format' locally"
+            git diff
+            exit 1
+          fi

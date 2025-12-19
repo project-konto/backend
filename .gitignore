@@ -7,6 +7,9 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/Dotnet.gitignore
 
+# JetBrains IDE
+.idea/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -52,3 +55,9 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# Node.js (for commit linting tools)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

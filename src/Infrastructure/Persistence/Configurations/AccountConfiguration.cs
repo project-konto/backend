@@ -1,0 +1,30 @@
+using KontoApi.Domain;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace KontoApi.Infrastructure.Persistence.Configurations;
+
+public class AccountConfiguration : IEntityTypeConfiguration<Account>
+{
+    public void Configure(EntityTypeBuilder<Account> builder)
+    {
+        builder.HasKey(a => a.Id);
+
+        builder.HasOne(a => a.User)
+            .WithMany()
+            .HasForeignKey("UserId")
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Property(a => a.Name)
+            .HasMaxLength(100)
+            .IsRequired();
+
+        builder.HasMany(a => a.Budgets)
+            .WithOne()
+            .HasForeignKey("AccountId")
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Metadata.FindNavigation(nameof(Account.Budgets))?
+            .SetPropertyAccessMode(PropertyAccessMode.Field);
+    }
+}

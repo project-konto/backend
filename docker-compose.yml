@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_USER: konto
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: konto
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=konto;Username=konto;Password=postgres"
+    ports:
+      - "5001:80"
+    volumes:
+      - ./src/Api/logs:/app/logs
+volumes:
+  pgdata:
