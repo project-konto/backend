@@ -40,7 +40,9 @@ public class AccountController : BaseController
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult> Delete(CancellationToken cancellationToken)
     {
-        var command = new DeleteAccountCommand(UserId);
+        var query = new GetAccountOverviewQuery(UserId);
+        var overview = await Mediator.Send(query, cancellationToken);
+        var command = new DeleteAccountCommand(overview.Id);
         await Mediator.Send(command, cancellationToken);
         return NoContent();
     }

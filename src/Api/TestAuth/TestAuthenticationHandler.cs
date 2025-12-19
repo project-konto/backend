@@ -30,18 +30,26 @@ public class TestAuthenticationHandler : AuthenticationHandler<AuthenticationSch
             var testEmail = "testuser@example.com";
 
             if (db == null)
+            {
+                Logger.LogWarning("TestAuthenticationHandler: KontoDbContext not available in RequestServices");
                 return Task.FromResult(AuthenticateResult.NoResult());
+            }
 
             var user = db.Users.FirstOrDefault(u => u.Email == testEmail);
 
             if (user == null)
             {
-                // Create a test user in this request's DB so handlers that rely on User existance succeed
+                // Create a test user in this request's DB so handlers that rely on User existence succeed
                 var hasher = Context.RequestServices.GetService(typeof(IPasswordHasher)) as IPasswordHasher;
                 var passwordHash = hasher?.Hash("Test123!") ?? "test-hash";
                 user = new User("Test User", testEmail, passwordHash);
                 db.Users.Add(user);
                 db.SaveChanges();
+                Logger.LogInformation("TestAuthenticationHandler: created test user {Email} with Id {UserId}", testEmail, user.Id);
+            }
+            else
+            {
+                Logger.LogInformation("TestAuthenticationHandler: found test user {Email} with Id {UserId}", testEmail, user.Id);
             }
 
             var claims = new[]

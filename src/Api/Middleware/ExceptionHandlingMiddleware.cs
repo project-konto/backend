@@ -34,14 +34,26 @@ public class ExceptionHandlingMiddleware(RequestDelegate next)
             _ => (HttpStatusCode.InternalServerError, "Internal Server Error")
         };
 
+        string? details;
+
         if (statusCode == HttpStatusCode.InternalServerError)
         {
-            Log.Error(exception, "Unhandled exception occurred");
+            var correlationId = Guid.NewGuid().ToString();
+            Log.Error(exception, "Unhandled exception occurred. CorrelationId: {CorrelationId}", correlationId);
             try
             {
-                System.IO.File.AppendAllText("/tmp/konto_app_exceptions.log", DateTime.UtcNow + " - " + exception + "\n\n");
+                System.IO.File.AppendAllText("/tmp/konto_app_exceptions.log", DateTime.UtcNow + " - CorrelationId: " + correlationId + "\n" + exception + "\n\n");
             }
-            catch { }
+            catch (Exception writeEx)
+            {
+                Log.Warning(writeEx, "Failed to write exception to file");
+            }
+
+            details = "CorrelationId: " + correlationId;
+        }
+        else
+        {
+            details = exception.Message;
         }
 
         context.Response.ContentType = "application/json";
@@ -50,7 +62,7 @@ public class ExceptionHandlingMiddleware(RequestDelegate next)
         var response = new ErrorResponse(
             context.Response.StatusCode,
             title,
-            exception.Message
+            details
         );
 
         var json = JsonSerializer.Serialize(response);

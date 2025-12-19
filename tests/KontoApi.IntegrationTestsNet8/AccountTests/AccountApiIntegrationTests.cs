@@ -14,40 +14,27 @@ namespace KontoApi.IntegrationTestsNet8.AccountTests;
 public class AccountApiIntegrationTests : IClassFixture<WebApplicationFactory<KontoApi.TestEntryPoint.Program>>
 {
     private readonly HttpClient client;
+    private readonly string _dbName = $"KontoApi_TestDb_{Guid.NewGuid()}";
 
     public AccountApiIntegrationTests(WebApplicationFactory<KontoApi.TestEntryPoint.Program> factory)
     {
         // Use a unique in-memory database per test class to avoid state leakage between tests
-        var uniqueFactory = factory.WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
+            var uniqueFactory = factory.WithWebHostBuilder(builder =>
             {
-                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<KontoDbContext>));
-                if (descriptor != null)
-                    services.Remove(descriptor);
-                services.AddDbContext<KontoDbContext>(options =>
-                    options.UseInMemoryDatabase($"KontoApi_TestDb_{Guid.NewGuid()}"));
-
-                // Build a temporary provider to seed the test user into this new in-memory database
-                var sp = services.BuildServiceProvider();
-                using (var seedScope = sp.CreateScope())
+                builder.ConfigureServices(services =>
                 {
-                    var db = seedScope.ServiceProvider.GetRequiredService<KontoDbContext>();
-                    var hasher = seedScope.ServiceProvider.GetRequiredService<KontoApi.Application.Common.Interfaces.IPasswordHasher>();
-                    var testEmail = "testuser@example.com";
-                    if (!db.Users.Any(u => u.Email == testEmail))
-                    {
-                        var user = new KontoApi.Domain.User("Test User", testEmail, hasher.Hash("Test123!"));
-                        db.Users.Add(user);
-                        db.SaveChanges();
-                    }
-                }
+                    var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<KontoDbContext>));
+                    if (descriptor != null)
+                        services.Remove(descriptor);
+                    services.AddDbContext<KontoDbContext>(options =>
+                        options.UseInMemoryDatabase(_dbName));
+                });
             });
-        });
 
         client = uniqueFactory.CreateClient();
 
-        // After host start, seed test user into the server's service provider to ensure TestAuthenticationHandler can find it
+        // Seed test user into the server's service provider after creating the client so the host's
+        // service provider (and its DbContext) are used for seeding.
         using (var scope = uniqueFactory.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<KontoDbContext>();
@@ -96,9 +83,19 @@ public class AccountApiIntegrationTests : IClassFixture<WebApplicationFactory<Ko
     {
         var createRequest = new { Name = "Test account" };
         var createResponse = await client.PostAsJsonAsync("/api/account", createRequest);
+        if (!createResponse.IsSuccessStatusCode)
+        {
+            var body = await createResponse.Content.ReadAsStringAsync();
+            Console.Error.WriteLine($"POST /api/account returned {(int)createResponse.StatusCode} - {createResponse.StatusCode}. Body: {body}");
+        }
         createResponse.EnsureSuccessStatusCode();
 
         var getResponse = await client.GetAsync("/api/account");
+        if (getResponse.StatusCode != HttpStatusCode.OK)
+        {
+            var body = await getResponse.Content.ReadAsStringAsync();
+            Console.Error.WriteLine($"GET /api/account returned {(int)getResponse.StatusCode} - {getResponse.StatusCode}. Body: {body}");
+        }
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var account = await getResponse.Content.ReadFromJsonAsync<AccountOverviewDto>();
         Assert.NotNull(account);
@@ -113,6 +110,11 @@ public class AccountApiIntegrationTests : IClassFixture<WebApplicationFactory<Ko
         var createResponse = await client.PostAsJsonAsync("/api/account", createRequest);
         createResponse.EnsureSuccessStatusCode();
         var deleteResponse = await client.DeleteAsync("/api/account");
+        if (deleteResponse.StatusCode != HttpStatusCode.NoContent)
+        {
+            var body = await deleteResponse.Content.ReadAsStringAsync();
+            Console.Error.WriteLine($"DELETE /api/account returned {(int)deleteResponse.StatusCode} - {deleteResponse.StatusCode}. Body: {body}");
+        }
         Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
         var getResponse = await client.GetAsync("/api/account");
         Assert.Equal(HttpStatusCode.NotFound, getResponse.StatusCode);
