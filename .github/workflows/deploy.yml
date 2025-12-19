@@ -1,0 +1,49 @@
+name: Deploy to Yandex Cloud
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Login to Yandex Cloud
+      - name: Yandex Cloud Login
+        uses: yandex-cloud/github-action@v3.0.0
+        with:
+          service-account-key: ${{ secrets.YC_SA_JSON_CREDENTIALS }}
+
+      # Login to Container Registry
+      - name: Login to Yandex Container Registry
+        run: |
+          yc container registry configure-docker
+
+      # Build Docker Image (Force AMD64 architecture)
+      - name: Build and Push Docker Image
+        run: |
+          # Use the Commit Hash as the tag so every build is unique
+          IMAGE_URL=cr.yandex/${{ secrets.YC_REGISTRY_ID }}/konto-api:${{ github.sha }}
+          
+          docker build --platform linux/amd64 -t $IMAGE_URL .
+          docker push $IMAGE_URL
+          
+          # Save the image URL for the next step
+          echo "IMAGE_URL=$IMAGE_URL" >> $GITHUB_ENV
+
+      # Deploy to Serverless Container
+      - name: Deploy Revision
+        run: |
+          yc serverless container revision deploy \
+            --container-id ${{ secrets.YC_CONTAINER_ID }} \
+            --image-url ${{ env.IMAGE_URL }} \
+            --service-account-id ${{ secrets.YC_SERVICE_ACCOUNT_ID }} \
+            --cores 1 \
+            --memory 512M \
+            --execution-timeout 30s \
+            --concurrency 4
