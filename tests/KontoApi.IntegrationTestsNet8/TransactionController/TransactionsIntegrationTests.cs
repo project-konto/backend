@@ -56,7 +56,8 @@ public class TransactionsIntegrationTests : IClassFixture<WebApplicationFactory<
         else
             categoryIdForTest = Guid.Parse(categoryJson.GetRawText().Trim('"'));
 
-        var request = new {
+        var request = new
+        {
             BudgetId = budgetId,
             Amount = 100.0m,
             Currency = "USD",
@@ -75,7 +76,8 @@ public class TransactionsIntegrationTests : IClassFixture<WebApplicationFactory<
     [Fact]
     public async Task AddTransaction_WithInvalidData_ReturnsBadRequest()
     {
-        var request = new {
+        var request = new
+        {
             BudgetId = Guid.Empty,
             Amount = -1.0m,
             Currency = "",
@@ -132,7 +134,8 @@ public class TransactionsIntegrationTests : IClassFixture<WebApplicationFactory<
         else
             categoryId2 = Guid.Parse(categoryJson2.GetRawText().Trim('"'));
 
-        var createRequest = new {
+        var createRequest = new
+        {
             BudgetId = budgetId,
             Amount = 50.0m,
             Currency = "USD",
@@ -185,7 +188,8 @@ public class TransactionsIntegrationTests : IClassFixture<WebApplicationFactory<
         else
             categoryId3 = Guid.Parse(categoryJson3.GetRawText().Trim('"'));
 
-        var createRequest = new {
+        var createRequest = new
+        {
             BudgetId = budgetId,
             Amount = 10.0m,
             Currency = "USD",

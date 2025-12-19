@@ -32,7 +32,8 @@ public class BudgetsIntegrationTests : IClassFixture<WebApplicationFactory<Konto
         else
             accountId = Guid.Parse(accountJson.GetRawText().Trim('"'));
 
-        var request = new {
+        var request = new
+        {
             AccountId = accountId,
             Name = "Test budget",
             InitialBalance = 1000m,
@@ -48,7 +49,8 @@ public class BudgetsIntegrationTests : IClassFixture<WebApplicationFactory<Konto
     [Fact]
     public async Task CreateBudget_WithInvalidData_ReturnsBadRequest()
     {
-        var request = new {
+        var request = new
+        {
             AccountId = Guid.Empty,
             Name = "",
             InitialBalance = -1m,
@@ -79,7 +81,8 @@ public class BudgetsIntegrationTests : IClassFixture<WebApplicationFactory<Konto
         else
             accountId = Guid.Parse(accountJson.GetRawText().Trim('"'));
 
-        var createRequest = new {
+        var createRequest = new
+        {
             AccountId = accountId,
             Name = "Budget1",
             InitialBalance = 500m,
@@ -107,7 +110,8 @@ public class BudgetsIntegrationTests : IClassFixture<WebApplicationFactory<Konto
         else
             accountId = Guid.Parse(accountJson.GetRawText().Trim('"'));
 
-        var createRequest = new {
+        var createRequest = new
+        {
             AccountId = accountId,
             Name = "BudgetToDelete",
             InitialBalance = 100m,
@@ -136,7 +140,8 @@ public class BudgetsIntegrationTests : IClassFixture<WebApplicationFactory<Konto
         else
             accountId = Guid.Parse(accountJson.GetRawText().Trim('"'));
 
-        var createRequest = new {
+        var createRequest = new
+        {
             AccountId = accountId,
             Name = "BudgetToRename",
             InitialBalance = 200m,
