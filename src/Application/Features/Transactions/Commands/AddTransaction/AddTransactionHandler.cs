@@ -21,9 +21,7 @@ public class AddTransactionHandler(IBudgetRepository budgetRepository, IApplicat
         var money = new Money(request.Amount, request.Currency);
         var transaction = new Transaction(money, request.Type, category, request.Date, request.Description);
 
-        budget.AddTransaction(transaction);
-
-        await budgetRepository.UpdateAsync(budget, ct);
+        await budgetRepository.AddTransactionAsync(budget.Id, transaction, ct);
 
         return transaction.Id;
     }

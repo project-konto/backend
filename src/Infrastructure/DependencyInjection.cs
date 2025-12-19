@@ -15,8 +15,17 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var connectionString = configuration.GetConnectionString("DefaultConnection");
-        services.AddDbContext<KontoDbContext>(options =>
-            options.UseNpgsql(connectionString));
+        if (string.IsNullOrWhiteSpace(connectionString))
+        {
+            // When running integration tests without a real DB, use InMemory provider as fallback
+            services.AddDbContext<KontoDbContext>(options =>
+                options.UseInMemoryDatabase("KontoApi_TestDb"));
+        }
+        else
+        {
+            services.AddDbContext<KontoDbContext>(options =>
+                options.UseNpgsql(connectionString));
+        }
 
         services.AddScoped<IApplicationDbContext>(provider =>
             provider.GetRequiredService<KontoDbContext>());
