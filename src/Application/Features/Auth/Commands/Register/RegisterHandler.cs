@@ -5,7 +5,7 @@ using MediatR;
 
 namespace KontoApi.Application.Features.Auth.Commands.Register;
 
-public class RegisterHandler(IUserRepository userRepository, IPasswordHasher passwordHasher)
+public class RegisterHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IAccountRepository accountRepository)
     : IRequestHandler<RegisterCommand, Guid>
 {
     public async Task<Guid> Handle(RegisterCommand request, CancellationToken cancellationToken)
@@ -19,6 +19,10 @@ public class RegisterHandler(IUserRepository userRepository, IPasswordHasher pas
         var user = new User(request.Name, request.Email, hashedPassword);
 
         await userRepository.AddAsync(user, cancellationToken);
+
+        // Create a default account (which creates a default budget) for the new user
+        var account = new Account(user, "Default");
+        await accountRepository.AddAsync(account, cancellationToken);
 
         return user.Id;
     }
