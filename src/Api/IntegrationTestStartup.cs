@@ -40,7 +40,10 @@ namespace KontoApi.Api
             {
                 System.IO.File.AppendAllText("/tmp/konto_startup.log", DateTime.UtcNow + " - ConfigureServices invoked\n");
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to write startup log in ConfigureServices");
+            }
 
             services.AddScoped<ICurrentUserService, CurrentUserService>();
 
@@ -162,7 +165,10 @@ namespace KontoApi.Api
             {
                 System.IO.File.AppendAllText("/tmp/konto_startup.log", DateTime.UtcNow + " - Configure invoked\n");
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Failed to write startup log in Configure");
+            }
 
             app.UseSerilogRequestLogging(options =>
             {
@@ -197,7 +203,10 @@ namespace KontoApi.Api
                     db.SaveChanges();
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Database seeding failed in IntegrationTestStartup");
+            }
 
             app.UseAuthentication();
             app.UseAuthorization();

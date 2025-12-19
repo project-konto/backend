@@ -14,7 +14,10 @@ namespace KontoApi.TestEntryPoint
             {
                 System.IO.File.AppendAllText("/tmp/konto_test_entrypoint.log", DateTime.UtcNow + " - CreateHostBuilder invoked\n");
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"CreateHostBuilder: failed to write test entrypoint log: {ex}");
+            }
             return KontoApi.Api.Program.CreateHostBuilder(args);
         }
 
@@ -24,7 +27,10 @@ namespace KontoApi.TestEntryPoint
             {
                 System.IO.File.AppendAllText("/tmp/konto_test_entrypoint.log", DateTime.UtcNow + " - CreateWebApplication invoked\n");
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"CreateWebApplication: failed to write test entrypoint log: {ex}");
+            }
             return KontoApi.Api.Program.CreateWebApplication(args);
         }
 
