@@ -2,6 +2,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /app
 
+# Yandex Cloud CA certificate
+RUN mkdir -p /app/certs
+ADD https://storage.yandexcloud.net/cloud-certs/CA.pem /app/certs/root.crt
+RUN chmod 644 /app/certs/root.crt
+
 # Copy csproj and restore as distinct layers
 COPY src/Api/KontoApi.Api.csproj src/Api/
 COPY src/Application/KontoApi.Application.csproj src/Application/
@@ -20,7 +25,4 @@ COPY --from=build /app/out .
 
 EXPOSE 80
 
-# Configure the app to listen on container port 80
-ENV ASPNETCORE_URLS=http://+:80
-
-ENTRYPOINT ["dotnet", "KontoApi.Api.dll"]
+ENTRYPOINT ["sh", "-c", "dotnet KontoApi.Api.dll --urls http://0.0.0.0:${PORT:-80}"]
