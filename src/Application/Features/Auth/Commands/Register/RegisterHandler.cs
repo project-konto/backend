@@ -1,12 +1,11 @@
 using KontoApi.Application.Common.Exceptions;
 using KontoApi.Application.Common.Interfaces;
-using KontoApi.Domain;
 using MediatR;
 
 namespace KontoApi.Application.Features.Auth.Commands.Register;
 
-public class RegisterHandler(IUserRepository userRepository, IPasswordHasher passwordHasher, IAccountRepository accountRepository)
-    : IRequestHandler<RegisterCommand, Guid>
+public class RegisterHandler(IUserRepository userRepository, 
+    IPasswordHasher passwordHasher, ISender sender) : IRequestHandler<RegisterCommand, Guid>
 {
     public async Task<Guid> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
@@ -15,15 +14,10 @@ public class RegisterHandler(IUserRepository userRepository, IPasswordHasher pas
             throw new ConflictException($"Email '{request.Email}' is already in use");
 
         var hashedPassword = passwordHasher.Hash(request.Password);
-
-        var user = new User(request.Name, request.Email, hashedPassword);
+        var user = new Domain.User(request.Name, request.Email, hashedPassword);
 
         await userRepository.AddAsync(user, cancellationToken);
-
-        // Create a default account (which creates a default budget) for the new user
-        var account = new Account(user, "Default");
-        await accountRepository.AddAsync(account, cancellationToken);
-
+        await sender.Send(new Accounts.Commands.CreateAccount.CreateAccountCommand(user.Id, "Default"), cancellationToken);
         return user.Id;
     }
 }

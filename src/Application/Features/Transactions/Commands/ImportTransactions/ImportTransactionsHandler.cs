@@ -13,12 +13,11 @@ public class ImportTransactionsHandler(
 {
     public async Task<ImportResultDto> Handle(ImportTransactionsCommand request, CancellationToken cancellationToken)
     {
-        var budget = await budgetRepository.GetByIdAsync(request.BudgetId, cancellationToken);
+        var budget = await budgetRepository.GetByIdForImportAsync(request.BudgetId, cancellationToken);
         if (budget == null)
             throw new NotFoundException(typeof(Budget), request.BudgetId);
 
         var parsedRecords = await statementParser.ParseAsync(request.FileStream, cancellationToken);
-
         var success = 0;
         var failed = 0;
         var errors = new List<string>();
@@ -47,7 +46,6 @@ public class ImportTransactionsHandler(
         }
 
         await budgetRepository.UpdateAsync(budget, cancellationToken);
-
         return new(parsedRecords.Count, success, failed, errors);
     }
 }

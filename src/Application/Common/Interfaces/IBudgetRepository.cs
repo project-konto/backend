@@ -10,4 +10,5 @@ public interface IBudgetRepository
     Task AddTransactionAsync(Guid budgetId, Transaction transaction, CancellationToken cancellationToken = default);
     Task DeleteAsync(Guid id, CancellationToken cancellationToken);
     Task DeleteTransactionAsync(Guid budgetId, Guid transactionId, CancellationToken cancellationToken = default);
+    Task<Budget?> GetByIdForImportAsync(Guid id, CancellationToken cancellationToken);
 }

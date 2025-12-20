@@ -1,10 +1,11 @@
 using KontoApi.Application.Common.Interfaces;
 using KontoApi.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace KontoApi.Infrastructure.Persistence.Repositories;
 
-public class BudgetRepository(KontoDbContext dbContext) : IBudgetRepository
+public class BudgetRepository(KontoDbContext dbContext, ILogger<BudgetRepository> logger) : IBudgetRepository
 {
     public async Task<Budget?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
@@ -22,8 +23,26 @@ public class BudgetRepository(KontoDbContext dbContext) : IBudgetRepository
 
     public async Task UpdateAsync(Budget budget, CancellationToken cancellationToken)
     {
-        dbContext.Budgets.Update(budget);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        
+        catch (DbUpdateConcurrencyException ex)
+        {
+            foreach (var entry in ex.Entries)
+            {
+                if (entry.Entity is Transaction)
+                {
+                    entry.State = EntityState.Added;
+                    continue;
+                }
+
+                throw;
+            }
+
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
     }
 
     public async Task AddTransactionAsync(Guid budgetId, Transaction transaction, CancellationToken cancellationToken = default)
@@ -56,5 +75,11 @@ public class BudgetRepository(KontoDbContext dbContext) : IBudgetRepository
 
         dbContext.Transactions.Remove(tx);
         await dbContext.SaveChangesAsync(cancellationToken);
+    }
+    
+    public async Task<Budget?> GetByIdForImportAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return await dbContext.Budgets
+            .FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
     }
 }

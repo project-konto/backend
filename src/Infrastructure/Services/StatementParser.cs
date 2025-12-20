@@ -93,6 +93,7 @@ public partial class StatementParser(ICategoryRepository categoryRepository) : I
             if (Regex.IsMatch(part, DateRegex.ToString()))
             {
                 dateTime = DateTime.ParseExact(part, formatData, CultureInfo.InvariantCulture);
+                dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
                 lineWithInfo = true;
             }
 
@@ -130,6 +131,10 @@ public partial class StatementParser(ICategoryRepository categoryRepository) : I
             else if (description.Contains("Перевод")) transactionType = TransactionType.Transfer;
             else transactionType = TransactionType.Expense;
         }
+
+        description = description.Trim();
+        if (string.IsNullOrWhiteSpace(description))
+            description = "Uncategorized";
 
         var category = await categoryRepository.GetByNameAsync(description, cancellationToken);
         var categoryId = category.Id;
