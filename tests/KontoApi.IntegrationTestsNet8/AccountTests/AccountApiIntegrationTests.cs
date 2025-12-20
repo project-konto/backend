@@ -19,17 +19,17 @@ public class AccountApiIntegrationTests : IClassFixture<WebApplicationFactory<Ko
     public AccountApiIntegrationTests(WebApplicationFactory<KontoApi.TestEntryPoint.Program> factory)
     {
         // Use a unique in-memory database per test class to avoid state leakage between tests
-            var uniqueFactory = factory.WithWebHostBuilder(builder =>
+        var uniqueFactory = factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureServices(services =>
             {
-                builder.ConfigureServices(services =>
-                {
-                    var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<KontoDbContext>));
-                    if (descriptor != null)
-                        services.Remove(descriptor);
-                    services.AddDbContext<KontoDbContext>(options =>
-                        options.UseInMemoryDatabase(_dbName));
-                });
+                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<KontoDbContext>));
+                if (descriptor != null)
+                    services.Remove(descriptor);
+                services.AddDbContext<KontoDbContext>(options =>
+                    options.UseInMemoryDatabase(_dbName));
             });
+        });
 
         client = uniqueFactory.CreateClient();
 
