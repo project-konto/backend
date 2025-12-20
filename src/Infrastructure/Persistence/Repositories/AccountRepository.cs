@@ -12,7 +12,15 @@ public class AccountRepository(KontoDbContext dbContext, ILogger<AccountReposito
     {
         logger.LogInformation("AccountRepository.AddAsync: adding account Id={AccountId} for UserId={UserId}", account.Id, account.User?.Id);
         await dbContext.Accounts.AddAsync(account, cancellationToken);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            logger.LogWarning(ex, "Concurrency conflict when updating account {AccountId}", account.Id);
+            throw new InvalidOperationException($"Concurrent update conflict for account {account.Id}", ex);
+        }
         var total = await dbContext.Accounts.CountAsync(cancellationToken);
         logger.LogInformation("AccountRepository.AddAsync: saved account Id={AccountId}. Total accounts now={Total}", account.Id, total);
     }
@@ -62,7 +70,15 @@ public class AccountRepository(KontoDbContext dbContext, ILogger<AccountReposito
         if (accountStub != null)
         {
             dbContext.Accounts.Remove(accountStub);
-            await dbContext.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await dbContext.SaveChangesAsync(cancellationToken);
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                logger.LogWarning(ex, "Concurrency conflict when deleting account {AccountId}", id);
+                throw new InvalidOperationException($"Concurrent delete/update conflict for account {id}", ex);
+            }
         }
     }
 
@@ -75,7 +91,15 @@ public class AccountRepository(KontoDbContext dbContext, ILogger<AccountReposito
         await dbContext.Budgets.AddAsync(budget, cancellationToken);
         // set shadow FK AccountId
         dbContext.Entry(budget).Property("AccountId").CurrentValue = accountId;
-        await dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            logger.LogWarning(ex, "Concurrency conflict when adding budget to account {AccountId}", accountId);
+            throw new InvalidOperationException($"Concurrent update conflict for account {accountId}", ex);
+        }
     }
 
     public async Task<Account?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
