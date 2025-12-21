@@ -1,5 +1,6 @@
 using KontoApi.Domain;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace KontoApi.Application.Common.Interfaces;
 
@@ -12,4 +13,5 @@ public interface IApplicationDbContext
     DbSet<Category> Categories { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+    EntityEntry<TEntity> Entry<TEntity>(TEntity entity) where TEntity : class;
 }

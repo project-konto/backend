@@ -28,14 +28,13 @@ public class ImportTransactionsHandler(
             {
                 var category = await dbContext.Categories.FindAsync([record.CategoryId], cancellationToken);
                 if (category == null)
-                {
                     throw new($"Category {record.CategoryId} not found");
-                }
 
                 var money = new Money(record.Amount, record.Currency);
                 var tx = new Transaction(money, record.Type, category, record.Date, record.Description);
+                dbContext.Transactions.Add(tx);
+                dbContext.Entry(tx).Property("BudgetId").CurrentValue = request.BudgetId;
 
-                budget.AddTransaction(tx);
                 success++;
             }
             catch (Exception ex)
@@ -45,7 +44,7 @@ public class ImportTransactionsHandler(
             }
         }
 
-        await budgetRepository.UpdateAsync(budget, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
         return new(parsedRecords.Count, success, failed, errors);
     }
 }
