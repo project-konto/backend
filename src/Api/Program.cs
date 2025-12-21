@@ -1,6 +1,7 @@
 
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
 using KontoApi.Api.Middleware;
 using KontoApi.Api.Services;
 using KontoApi.Application;
@@ -104,7 +105,11 @@ public class Program
         builder.Host.UseSerilog((context, loggerConfiguration)
             => loggerConfiguration.ReadFrom.Configuration(context.Configuration));
 
-        builder.Services.AddControllers();
+        builder.Services.AddControllers()
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+            });
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(options =>
         {
