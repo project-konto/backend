@@ -4,7 +4,7 @@ using MediatR;
 
 namespace KontoApi.Application.Features.Auth.Commands.Register;
 
-public class RegisterHandler(IUserRepository userRepository, 
+public class RegisterHandler(IUserRepository userRepository,
     IPasswordHasher passwordHasher, ISender sender) : IRequestHandler<RegisterCommand, Guid>
 {
     public async Task<Guid> Handle(RegisterCommand request, CancellationToken cancellationToken)

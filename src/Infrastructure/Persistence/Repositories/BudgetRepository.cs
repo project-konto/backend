@@ -27,7 +27,7 @@ public class BudgetRepository(KontoDbContext dbContext, ILogger<BudgetRepository
         {
             await dbContext.SaveChangesAsync(cancellationToken);
         }
-        
+
         catch (DbUpdateConcurrencyException ex)
         {
             foreach (var entry in ex.Entries)
@@ -76,7 +76,7 @@ public class BudgetRepository(KontoDbContext dbContext, ILogger<BudgetRepository
         dbContext.Transactions.Remove(tx);
         await dbContext.SaveChangesAsync(cancellationToken);
     }
-    
+
     public async Task<Budget?> GetByIdForImportAsync(Guid id, CancellationToken cancellationToken)
     {
         return await dbContext.Budgets
