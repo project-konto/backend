@@ -11,12 +11,12 @@ using KontoApi.TestEntryPoint;
 
 namespace KontoApi.IntegrationTestsNet8.AccountTests;
 
-public class AccountApiIntegrationTests : IClassFixture<WebApplicationFactory<KontoApi.TestEntryPoint.Program>>
+public class AccountApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly HttpClient client;
-    private readonly string _dbName = $"KontoApi_TestDb_{Guid.NewGuid()}";
+    private readonly string dbName = $"KontoApi_TestDb_{Guid.NewGuid()}";
 
-    public AccountApiIntegrationTests(WebApplicationFactory<KontoApi.TestEntryPoint.Program> factory)
+    public AccountApiIntegrationTests(WebApplicationFactory<Program> factory)
     {
         // Use a unique in-memory database per test class to avoid state leakage between tests
         var uniqueFactory = factory.WithWebHostBuilder(builder =>
@@ -27,7 +27,7 @@ public class AccountApiIntegrationTests : IClassFixture<WebApplicationFactory<Ko
                 if (descriptor != null)
                     services.Remove(descriptor);
                 services.AddDbContext<KontoDbContext>(options =>
-                    options.UseInMemoryDatabase(_dbName));
+                    options.UseInMemoryDatabase(dbName));
             });
         });
 
@@ -35,18 +35,16 @@ public class AccountApiIntegrationTests : IClassFixture<WebApplicationFactory<Ko
 
         // Seed test user into the server's service provider after creating the client so the host's
         // service provider (and its DbContext) are used for seeding.
-        using (var scope = uniqueFactory.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<KontoDbContext>();
-            var hasher = scope.ServiceProvider.GetRequiredService<KontoApi.Application.Common.Interfaces.IPasswordHasher>();
-            var testEmail = "testuser@example.com";
-            if (!db.Users.Any(u => u.Email == testEmail))
-            {
-                var user = new KontoApi.Domain.User("Test User", testEmail, hasher.Hash("Test123!"));
-                db.Users.Add(user);
-                db.SaveChanges();
-            }
-        }
+        using var scope = uniqueFactory.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<KontoDbContext>();
+        var hasher = scope.ServiceProvider.GetRequiredService<Application.Common.Interfaces.IPasswordHasher>();
+        var testEmail = "testuser@example.com";
+
+        if (db.Users.Any(u => u.Email == testEmail)) return;
+
+        var user = new Domain.User("Test User", testEmail, hasher.Hash("Test123!"));
+        db.Users.Add(user);
+        db.SaveChanges();
     }
 
     [Fact]
@@ -86,7 +84,7 @@ public class AccountApiIntegrationTests : IClassFixture<WebApplicationFactory<Ko
         if (!createResponse.IsSuccessStatusCode)
         {
             var body = await createResponse.Content.ReadAsStringAsync();
-            Console.Error.WriteLine($"POST /api/account returned {(int)createResponse.StatusCode} - {createResponse.StatusCode}. Body: {body}");
+            await Console.Error.WriteLineAsync($"POST /api/account returned {(int)createResponse.StatusCode} - {createResponse.StatusCode}. Body: {body}");
         }
         createResponse.EnsureSuccessStatusCode();
 
@@ -94,7 +92,7 @@ public class AccountApiIntegrationTests : IClassFixture<WebApplicationFactory<Ko
         if (getResponse.StatusCode != HttpStatusCode.OK)
         {
             var body = await getResponse.Content.ReadAsStringAsync();
-            Console.Error.WriteLine($"GET /api/account returned {(int)getResponse.StatusCode} - {getResponse.StatusCode}. Body: {body}");
+            await Console.Error.WriteLineAsync($"GET /api/account returned {(int)getResponse.StatusCode} - {getResponse.StatusCode}. Body: {body}");
         }
         Assert.Equal(HttpStatusCode.OK, getResponse.StatusCode);
         var account = await getResponse.Content.ReadFromJsonAsync<AccountOverviewDto>();

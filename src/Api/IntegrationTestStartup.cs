@@ -7,38 +7,20 @@ using KontoApi.Application.Common.Interfaces;
 using KontoApi.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using KontoApi.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using KontoApi.Domain;
-using KontoApi.Application.Common.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace KontoApi.Api
 {
-    // Startup-like class used for integration tests host builder
-    public class IntegrationTestStartup
+    public class IntegrationTestStartup(IConfiguration configuration, IWebHostEnvironment env)
     {
-        private readonly IConfiguration _configuration;
-        private readonly IWebHostEnvironment _env;
-
-        public IntegrationTestStartup(IConfiguration configuration, IWebHostEnvironment env)
-        {
-            _configuration = configuration;
-            _env = env;
-        }
-
         public void ConfigureServices(IServiceCollection services)
         {
             try
             {
-                System.IO.File.AppendAllText("/tmp/konto_startup.log", DateTime.UtcNow + " - ConfigureServices invoked\n");
+                File.AppendAllText("/tmp/konto_startup.log", DateTime.UtcNow + " - ConfigureServices invoked\n");
             }
             catch (Exception ex)
             {
@@ -101,14 +83,15 @@ namespace KontoApi.Api
                     options.DefaultAuthenticateScheme = "Test";
                     options.DefaultChallengeScheme = "Test";
                 })
-                .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions, KontoApi.Api.TestAuth.TestAuthenticationHandler>("Test", _ => { })
+                .AddScheme<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions,
+                    TestAuth.TestAuthenticationHandler>("Test", _ => { })
                 .AddJwtBearer(options =>
                 {
                     options.IncludeErrorDetails = true;
 
-                    var jwtKey = _configuration["Jwt:Key"] ?? "test_jwt_key";
-                    var jwtIssuer = _configuration["Jwt:Issuer"] ?? "test_issuer";
-                    var jwtAudience = _configuration["Jwt:Audience"] ?? "test_audience";
+                    var jwtKey = configuration["Jwt:Key"] ?? "test_jwt_key";
+                    var jwtIssuer = configuration["Jwt:Issuer"] ?? "test_issuer";
+                    var jwtAudience = configuration["Jwt:Audience"] ?? "test_audience";
 
                     options.TokenValidationParameters = new()
                     {
@@ -126,27 +109,31 @@ namespace KontoApi.Api
                     {
                         OnAuthenticationFailed = context =>
                         {
-                            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<IntegrationTestStartup>>();
+                            var logger = context.HttpContext.RequestServices
+                                .GetRequiredService<ILogger<IntegrationTestStartup>>();
                             logger.LogError("Authentication failed: {Message}", context.Exception.Message);
                             return Task.CompletedTask;
                         },
                         OnTokenValidated = context =>
                         {
-                            var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<IntegrationTestStartup>>();
-                            logger.LogInformation("Token validated successfully for user: {User}", context.Principal?.Identity?.Name);
+                            var logger = context.HttpContext.RequestServices
+                                .GetRequiredService<ILogger<IntegrationTestStartup>>();
+                            logger.LogInformation("Token validated successfully for user: {User}",
+                                context.Principal?.Identity?.Name);
                             return Task.CompletedTask;
                         }
                     };
                 });
 
             services.AddApplication();
-            services.AddInfrastructure(_configuration);
+            services.AddInfrastructure(configuration, env);
 
             // Integration tests should use an in-memory database to avoid requiring Postgres.
             services.AddDbContext<KontoDbContext>(options =>
                 options.UseInMemoryDatabase("KontoApi_TestDb"));
 
-            var allowedOrigins = _configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? Array.Empty<string>();
+            var allowedOrigins = configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ??
+                                 [];
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowFrontend", policy =>
@@ -163,7 +150,7 @@ namespace KontoApi.Api
         {
             try
             {
-                System.IO.File.AppendAllText("/tmp/konto_startup.log", DateTime.UtcNow + " - Configure invoked\n");
+                File.AppendAllText("/tmp/konto_startup.log", DateTime.UtcNow + " - Configure invoked\n");
             }
             catch (Exception ex)
             {
@@ -211,7 +198,7 @@ namespace KontoApi.Api
             app.UseAuthentication();
             app.UseAuthorization();
 
-            if (_env.IsDevelopment())
+            if (env.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();

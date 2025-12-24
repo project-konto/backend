@@ -1,6 +1,6 @@
 using KontoApi.Domain;
 
-namespace KontoApi.Application.Features.Transactions.Queries.GetTransactionById;
+namespace KontoApi.Application.Features.Transactions.Queries.Common;
 
 public record TransactionDetailDto(
     Guid Id,

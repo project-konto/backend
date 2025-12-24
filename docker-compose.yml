@@ -7,15 +7,22 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: konto
     ports:
-      - "5432:5432"
+      - "5423:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U konto" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     volumes:
       - pgdata:/var/lib/postgresql/data
+
   api:
     build:
       context: .
       dockerfile: Dockerfile
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings__DefaultConnection: "Host=db;Port=5432;Database=konto;Username=konto;Password=postgres"
@@ -23,5 +30,6 @@ services:
       - "5001:80"
     volumes:
       - ./src/Api/logs:/app/logs
+
 volumes:
   pgdata:

@@ -1,3 +1,4 @@
+using KontoApi.Application.Features.Transactions.Queries.Common;
 using MediatR;
 
 namespace KontoApi.Application.Features.Transactions.Queries.GetTransactionById;

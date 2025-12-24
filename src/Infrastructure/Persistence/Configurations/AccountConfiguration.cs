@@ -19,7 +19,6 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
             .HasMaxLength(100)
             .IsRequired();
 
-        // Use UpdatedAt as a concurrency token to enable optimistic concurrency checks
         builder.Property(a => a.UpdatedAt)
             .IsRequired()
             .IsConcurrencyToken();

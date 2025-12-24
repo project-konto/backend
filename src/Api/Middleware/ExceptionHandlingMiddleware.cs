@@ -42,7 +42,7 @@ public class ExceptionHandlingMiddleware(RequestDelegate next)
             Log.Error(exception, "Unhandled exception occurred. CorrelationId: {CorrelationId}", correlationId);
             try
             {
-                System.IO.File.AppendAllText("/tmp/konto_app_exceptions.log", DateTime.UtcNow + " - CorrelationId: " + correlationId + "\n" + exception + "\n\n");
+                await File.AppendAllTextAsync("/tmp/konto_app_exceptions.log", DateTime.UtcNow + " - CorrelationId: " + correlationId + "\n" + exception + "\n\n");
             }
             catch (Exception writeEx)
             {

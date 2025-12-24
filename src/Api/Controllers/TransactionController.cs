@@ -1,8 +1,11 @@
 using KontoApi.Api.Contracts;
+using KontoApi.Application.Features.Budgets.Queries.GetBudgetDetails;
 using KontoApi.Application.Features.Transactions.Commands.AddTransaction;
 using KontoApi.Application.Features.Transactions.Commands.DeleteTransaction;
 using KontoApi.Application.Features.Transactions.Commands.ImportTransactions;
+using KontoApi.Application.Features.Transactions.Queries.Common;
 using KontoApi.Application.Features.Transactions.Queries.GetTransactionById;
+using KontoApi.Application.Features.Transactions.Queries.GetTransactions;
 using KontoApi.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +18,29 @@ namespace KontoApi.Api.Controllers;
 [Produces("application/json")]
 public class TransactionsController : BaseController
 {
+    // GET api/transactions?budgetId={id}&from={date}&to={date}
+    [HttpGet]
+    [ProducesResponseType(typeof(List<TransactionDetailDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetAllTransactions(
+        [FromQuery] Guid budgetId,
+        [FromQuery] DateTime? from,
+        [FromQuery] DateTime? to,
+        CancellationToken cancellationToken)
+    {
+        if (budgetId == Guid.Empty)
+        {
+            return BadRequest(new ErrorResponse(
+                StatusCodes.Status400BadRequest, "budgetId query parameter is required", null
+            ));
+        }
+
+        var query = new GetTransactionsQuery(budgetId, from, to);
+        var result = await Mediator.Send(query, cancellationToken);
+
+        return Ok(result);
+    }
+
     // POST api/transactions
     [HttpPost]
     [ProducesResponseType(typeof(object), StatusCodes.Status201Created)]

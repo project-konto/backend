@@ -1,5 +1,6 @@
 using KontoApi.Application.Common.Exceptions;
 using KontoApi.Application.Common.Interfaces;
+using KontoApi.Application.Features.Transactions.Queries.Common;
 using KontoApi.Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
