@@ -90,6 +90,15 @@ public class Program
         return app;
     }
 
+    // Expose CreateHostBuilder for WebApplicationFactory used in integration tests.
+    public static IHostBuilder CreateHostBuilder(string[] args)
+    {
+        return Host.CreateDefaultBuilder(args)
+            .UseSerilog((context, loggerConfiguration)
+                => loggerConfiguration.ReadFrom.Configuration(context.Configuration))
+            .ConfigureWebHostDefaults(webBuilder => { webBuilder.UseStartup<IntegrationTestStartup>(); });
+    }
+
     private static void ConfigureServices(WebApplicationBuilder builder)
     {
         var configuration = builder.Configuration;

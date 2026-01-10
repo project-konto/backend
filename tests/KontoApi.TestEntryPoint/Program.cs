@@ -4,6 +4,11 @@ namespace KontoApi.TestEntryPoint
 {
     public class Program
     {
+        public static Microsoft.Extensions.Hosting.IHostBuilder CreateHostBuilder(string[] args)
+        {
+            return Api.Program.CreateHostBuilder(args);
+        }
+
         public static WebApplication CreateWebApplication(string[] args)
         {
             try
