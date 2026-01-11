@@ -103,6 +103,14 @@ public class Program
     {
         var configuration = builder.Configuration;
 
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor |
+                                       Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
+            options.KnownNetworks.Clear();
+            options.KnownProxies.Clear();
+        });
+
         builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddHealthChecks();
@@ -150,27 +158,27 @@ public class Program
 
         System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
         builder.Services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-        })
-        .AddJwtBearer(options =>
-        {
-            var jwtKey = configuration["Jwt:Key"] ?? "development_jwt_key";
-            var jwtIssuer = configuration["Jwt:Issuer"] ?? "development_issuer";
-            var jwtAudience = configuration["Jwt:Audience"] ?? "development_audience";
-
-            options.TokenValidationParameters = new()
             {
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = jwtIssuer,
-                ValidAudience = jwtAudience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-            };
-        });
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                var jwtKey = configuration["Jwt:Key"] ?? "development_jwt_key";
+                var jwtIssuer = configuration["Jwt:Issuer"] ?? "development_issuer";
+                var jwtAudience = configuration["Jwt:Audience"] ?? "development_audience";
+
+                options.TokenValidationParameters = new()
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtIssuer,
+                    ValidAudience = jwtAudience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                };
+            });
 
         builder.Services.AddApplication();
 
@@ -191,6 +199,8 @@ public class Program
 
     private static void ConfigurePipeline(WebApplication app)
     {
+        app.UseForwardedHeaders();
+
         app.UseSerilogRequestLogging(options =>
         {
             options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>

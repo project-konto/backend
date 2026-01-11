@@ -21,6 +21,10 @@ RUN dotnet publish src/Api/KontoApi.Api.csproj -c Release -o out
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
+
+# Install missing dependencies
+RUN apt-get update && apt-get install -y libgssapi-krb5-2 && rm -rf /var/lib/apt/lists/*
+
 COPY --from=build /app/out .
 COPY --from=build /app/certs /app/certs
 
