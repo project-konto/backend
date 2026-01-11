@@ -74,129 +74,99 @@ public partial class StatementParser(ICategoryRepository categoryRepository) : I
 
         return lines
             .Select(line => string
-                .Join(" ", line.OrderBy(w => w.BoundingBox.Left)
-                    .Select(w => w.Text)))
+            .Join(" ", line.OrderBy(w => w.BoundingBox.Left)
+            .Select(w => w.Text)))
             .ToList();
     }
 
     internal async Task<ParsedTransaction> ParseLineAsync(string line, CancellationToken cancellationToken)
     {
-        const string formatData = "dd.MM.yyyy";
-        var amountExist = false;
-        var lineWithInfo = false;
-        var parts = line.Split(' ');
         var dateTime = DateTime.MinValue;
         decimal amount = 0;
         var currency = "RUB";
-        var description = "";
-        var transactionType = TransactionType.Income;
+        var parsedDescription = "";
+        var transactionType = TransactionType.Expense;
         var ruCulture = CultureInfo.GetCultureInfo("ru-RU");
 
-
-        foreach (var part in parts)
+        var dateMatch = DateRegex.Match(line);
+        if (!dateMatch.Success)
         {
-            if (Regex.IsMatch(part, DateRegex.ToString()))
-            {
-                dateTime = DateTime.ParseExact(part, formatData, CultureInfo.InvariantCulture);
-                dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
-                lineWithInfo = true;
-            }
+            return new ParsedTransaction(default, 0, "RUB", TransactionType.Expense, null, Guid.Empty);
+        }
 
-            if (lineWithInfo == false)
+        var formats = new[] { "dd.MM.yyyy", "dd.MM.yy" };
+        if (!DateTime.TryParseExact(dateMatch.Value, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime))
+        {
+            return new ParsedTransaction(default, 0, "RUB", TransactionType.Expense, null, Guid.Empty);
+        }
+        dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc);
+
+        var amountMatches = MyRegex().Matches(line);
+        foreach (Match match in amountMatches)
+        {
+            var rawAmount = match.Value;
+            var cleanAmount = rawAmount.Replace(" ", "").Replace("\u00A0", "").Replace(",", ".");
+            if (decimal.TryParse(cleanAmount, NumberStyles.Any, CultureInfo.InvariantCulture, out var parsed))
+            {
+                amount = parsed;
                 break;
-
-            var amountMatches = MyRegex().Matches(line);
-            foreach (Match match in amountMatches)
-            {
-                var rawAmount = match.Value;
-                var cleanAmount = rawAmount.Replace(" ", "").Replace("\u00A0", "");
-
-                if (!decimal.TryParse(cleanAmount, NumberStyles.Number, ruCulture, out var parsedAmount)) continue;
-                amount = parsedAmount;
-                break;
             }
-
-            if (Regex.IsMatch(part, CurrencyRegex.ToString()))
-            {
-                currency = part switch
-                {
-                    "\u20bd" => "RUB",
-                    "\u0024" => "USD",
-                    "\u20AC" => "EUR",
-                    _ => currency
-                };
-            }
-
-            if (Regex.IsMatch(part, @"\p{L}"))
-            {
-                description += $" {part}";
-            }
-
-            if (line.Contains('+') && !description.Contains("Перевод")) transactionType = TransactionType.Income;
-            else if (description.Contains("Перевод")) transactionType = TransactionType.Transfer;
-            else transactionType = TransactionType.Expense;
         }
 
-        description = description.Trim();
-        if (string.IsNullOrWhiteSpace(description))
-            description = "Прочее";
+        if (line.Contains('$') || line.Contains("USD")) currency = "USD";
+        else if (line.Contains('€') || line.Contains("EUR")) currency = "EUR";
 
-        var category = await categoryRepository.GetByNameAsync(description, cancellationToken);
-
-        if (category == null)
+        var textProcessing = line.Replace(dateMatch.Value, "");
+        foreach (Match match in amountMatches)
         {
-            var inferredName = InferCategory(description);
-            if (inferredName != null)
-            {
-                category = await categoryRepository.GetByNameAsync(inferredName, cancellationToken);
-            }
+            textProcessing = textProcessing.Replace(match.Value, "");
         }
+        textProcessing = Regex.Replace(textProcessing, @"[\$\u20bd\u20ac]", "");
 
-        if (category == null)
+        parsedDescription = Regex.Replace(textProcessing, @"\s+", " ").Trim();
+
+        if (line.Contains('+') || parsedDescription.Contains("Пополнение", StringComparison.OrdinalIgnoreCase))
+            transactionType = TransactionType.Income;
+        else if (parsedDescription.Contains("Перевод", StringComparison.OrdinalIgnoreCase))
+            transactionType = TransactionType.Transfer;
+        else
+            transactionType = TransactionType.Expense;
+
+        if (string.IsNullOrWhiteSpace(parsedDescription))
+            parsedDescription = "Uncategorized";
+
+        var categoryName = "";
+        if (await categoryRepository.ExistsByNameAsync(parsedDescription, cancellationToken))
         {
-            const string DefaultCategoryName = "Прочее";
-            category = await categoryRepository.GetByNameAsync(DefaultCategoryName, cancellationToken);
-
-            if (category == null)
-            {
-                category = new Category(DefaultCategoryName);
-                await categoryRepository.AddAsync(category, cancellationToken);
-            }
+            categoryName = parsedDescription;
         }
-        
+        else
+        {
+            categoryName = "Прочие расходы";
+        }
+
+        var category = await categoryRepository.GetByNameAsync(categoryName, cancellationToken);
         var categoryId = category.Id;
 
-        var transaction = new ParsedTransaction(
+        return new ParsedTransaction(
             dateTime,
             amount,
             currency,
             transactionType,
-            description,
+            parsedDescription,
             categoryId
         );
-
-        return transaction;
     }
 
-    private static string? InferCategory(string description)
-    {
-        var d = description.ToLowerInvariant();
-        if (d.Contains("ресторан") || d.Contains("кафе") || d.Contains("бургер") || d.Contains("mcdonalds") || d.Contains("вкусно и точка")) return "Рестораны и кафе";
-        if (d.Contains("супермаркет") || d.Contains("продукты") || d.Contains("пятерочка") || d.Contains("магнит") || d.Contains("перекресток") || d.Contains("лента")) return "Супермаркеты";
-        if (d.Contains("такси") || d.Contains("taxi") || d.Contains("uber") || d.Contains("yandex") || d.Contains("бензин") || d.Contains("азс") || d.Contains("driver") || d.Contains("транспорт")) return "Транспорт";
-        if (d.Contains("аптека") || d.Contains("здоровье")) return "Красота";
-        if (d.Contains("спорт") || d.Contains("sport") || d.Contains("fitness") || d.Contains("фитнес")) return "Спорт";
-        if (d.Contains("одежда") || d.Contains("clothes") || d.Contains("lamoda") || d.Contains("wildberries") || d.Contains("ozon")) return "Одежда";
-        if (d.Contains("перевод")) return "Переводы"; 
-        return null; 
-    }
-
-    [GeneratedRegex(@"^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.\d{4}$", RegexOptions.Compiled)]
+    [GeneratedRegex(@"(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.(\d{4}|\d{2})", RegexOptions.Compiled)]
     private static partial Regex MyDateRegex();
-    [GeneratedRegex(@"^-?\d+([.,]\d+)?$", RegexOptions.Compiled)]
+
+    [GeneratedRegex(@"-?\d+([.,]\d+)?", RegexOptions.Compiled)]
     private static partial Regex MyAmountRegex();
-    [GeneratedRegex(@"^-?\d+([.,]\d+)?\s*[\u20BD\u0024\u20AC]$", RegexOptions.Compiled)]
+
+    [GeneratedRegex(@"-?\d+([.,]\d+)?\s*[\u20BD\u0024\u20AC]", RegexOptions.Compiled)]
     private static partial Regex MyCurrencyRegex();
-    [GeneratedRegex(@"(?<=\s|^)[-+]?[\d\s]*\d,\d{2}(?=\s|$)")]
+
+    [GeneratedRegex(@"(?<=\s|^)[-+]?[\d\s]*\d[.,]\d{2}(?=\s|$)")]
     private static partial Regex MyRegex();
 }
