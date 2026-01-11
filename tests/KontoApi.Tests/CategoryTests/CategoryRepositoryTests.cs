@@ -108,4 +108,38 @@ public class CategoryRepositoryTests
         Assert.Equal(category.Id, result.Id);
         Assert.Equal("rent", result.Name);
     }
+
+    [Fact]
+    public async Task GetByNameAsync_WhenCategoryExists_ReturnsCategory()
+    {
+        var (context, connection) = DbContextFactory.CreateSqliteInMemory();
+        await using var _ = connection;
+
+        var repository = new CategoryRepository(context);
+        var expectedCategory = new Category("Groceries");
+        await repository.AddAsync(expectedCategory, CancellationToken.None);
+
+        var result = await repository.GetByNameAsync("Groceries", CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Equal(expectedCategory.Id, result.Id);
+    }
+
+    [Fact]
+    public async Task GetByNameAsync_WhenCategoryDoesNotExist_ReturnsNull()
+    {
+        var (context, connection) = DbContextFactory.CreateSqliteInMemory();
+        await using var _ = connection;
+
+        var repository = new CategoryRepository(context);
+        
+        // This is the CRITICAL test. Previously it would create a category. Now it should return null.
+        var result = await repository.GetByNameAsync("NonExistentCategory", CancellationToken.None);
+
+        Assert.Null(result);
+        
+        // Double check it wasn't added to DB
+        var any = await context.Categories.AnyAsync(c => c.Name == "NonExistentCategory");
+        Assert.False(any);
+    }
 }

@@ -41,6 +41,8 @@ public class Program
                         await context.Database.MigrateAsync();
                         Log.Information("Database migrations applied successfully");
                     }
+
+                    await CategorySeeder.SeedAsync(context);
                 }
                 catch (Exception exception)
                 {

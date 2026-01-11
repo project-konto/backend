@@ -42,21 +42,12 @@ public class CategoryRepository(KontoDbContext context) : ICategoryRepository
             .AnyAsync(c => c.Name == normalizedName, cancellationToken);
     }
 
-    public async Task<Category> GetByNameAsync(string name, CancellationToken cancellationToken)
+    public async Task<Category?> GetByNameAsync(string name, CancellationToken cancellationToken)
     {
         var normalizedName = name.Trim();
         var category = await context.Categories
             .FirstOrDefaultAsync(c => c.Name == normalizedName, cancellationToken);
 
-        if (category != null)
-        {
-            return category;
-        }
-
-        var newCategory = new Category(normalizedName);
-        await context.Categories.AddAsync(newCategory, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
-
-        return newCategory;
+        return category;
     }
 }

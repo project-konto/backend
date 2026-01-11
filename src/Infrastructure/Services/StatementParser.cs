@@ -8,7 +8,12 @@ using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using KontoApi.Application.Features.Categories.Queries.GetCategoryById;
 
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("KontoApi.Tests")]
+
 namespace KontoApi.Infrastructure.Services;
+
 
 public partial class StatementParser(ICategoryRepository categoryRepository) : IStatementParser
 {
@@ -74,7 +79,7 @@ public partial class StatementParser(ICategoryRepository categoryRepository) : I
             .ToList();
     }
 
-    private async Task<ParsedTransaction> ParseLineAsync(string line, CancellationToken cancellationToken)
+    internal async Task<ParsedTransaction> ParseLineAsync(string line, CancellationToken cancellationToken)
     {
         const string formatData = "dd.MM.yyyy";
         var amountExist = false;
@@ -134,9 +139,31 @@ public partial class StatementParser(ICategoryRepository categoryRepository) : I
 
         description = description.Trim();
         if (string.IsNullOrWhiteSpace(description))
-            description = "Uncategorized";
+            description = "Прочее";
 
         var category = await categoryRepository.GetByNameAsync(description, cancellationToken);
+
+        if (category == null)
+        {
+            var inferredName = InferCategory(description);
+            if (inferredName != null)
+            {
+                category = await categoryRepository.GetByNameAsync(inferredName, cancellationToken);
+            }
+        }
+
+        if (category == null)
+        {
+            const string DefaultCategoryName = "Прочее";
+            category = await categoryRepository.GetByNameAsync(DefaultCategoryName, cancellationToken);
+
+            if (category == null)
+            {
+                category = new Category(DefaultCategoryName);
+                await categoryRepository.AddAsync(category, cancellationToken);
+            }
+        }
+        
         var categoryId = category.Id;
 
         var transaction = new ParsedTransaction(
@@ -149,6 +176,19 @@ public partial class StatementParser(ICategoryRepository categoryRepository) : I
         );
 
         return transaction;
+    }
+
+    private static string? InferCategory(string description)
+    {
+        var d = description.ToLowerInvariant();
+        if (d.Contains("ресторан") || d.Contains("кафе") || d.Contains("бургер") || d.Contains("mcdonalds") || d.Contains("вкусно и точка")) return "Рестораны и кафе";
+        if (d.Contains("супермаркет") || d.Contains("продукты") || d.Contains("пятерочка") || d.Contains("магнит") || d.Contains("перекресток") || d.Contains("лента")) return "Супермаркеты";
+        if (d.Contains("такси") || d.Contains("taxi") || d.Contains("uber") || d.Contains("yandex") || d.Contains("бензин") || d.Contains("азс") || d.Contains("driver") || d.Contains("транспорт")) return "Транспорт";
+        if (d.Contains("аптека") || d.Contains("здоровье")) return "Красота";
+        if (d.Contains("спорт") || d.Contains("sport") || d.Contains("fitness") || d.Contains("фитнес")) return "Спорт";
+        if (d.Contains("одежда") || d.Contains("clothes") || d.Contains("lamoda") || d.Contains("wildberries") || d.Contains("ozon")) return "Одежда";
+        if (d.Contains("перевод")) return "Переводы"; 
+        return null; 
     }
 
     [GeneratedRegex(@"^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.\d{4}$", RegexOptions.Compiled)]
